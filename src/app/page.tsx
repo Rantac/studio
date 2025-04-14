@@ -3,14 +3,9 @@
 import {useState, useEffect, useRef} from 'react';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
-import {Check, Circle, Plus, Trash} from 'lucide-react';
+import {Check, Circle, Trash} from 'lucide-react';
 import {cn} from '@/lib/utils';
-import {AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger} from '@/components/ui/alert-dialog';
 import {useToast} from '@/hooks/use-toast';
-import {Textarea} from '@/components/ui/textarea';
-import {Label} from '@/components/ui/label';
-import {ScrollArea} from '@/components/ui/scroll-area';
-import {suggestSchedule} from '@/ai/flows/smart-schedule';
 import {Input} from '@/components/ui/input';
 
 interface Task {
@@ -42,15 +37,11 @@ export default function Home() {
   const handleAddTask = async () => {
     if (newTaskDescription.trim() !== '') {
       try {
-        const scheduleSuggestion = await suggestSchedule({
-          taskDescription: newTaskDescription,
-        });
-
         const newTask: Task = {
           id: Date.now().toString(),
           description: newTaskDescription,
           completed: false,
-          suggestedSchedule: scheduleSuggestion.suggestedSchedule,
+          suggestedSchedule: '',
         };
         setTasks([...tasks, newTask]);
         setNewTaskDescription('');
@@ -61,7 +52,7 @@ export default function Home() {
         });
       } catch (error: any) {
         toast({
-          title: 'Error suggesting schedule',
+          title: 'Error adding task',
           description: error.message,
           variant: 'destructive',
         });
@@ -100,63 +91,53 @@ export default function Home() {
           <CardTitle className="text-xl font-semibold">TaskFlow</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[300px] w-full">
-            <div className="divide-y divide-gray-200">
-              {tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="mr-2 rounded-full h-8 w-8"
-                      onClick={() => handleCompleteTask(task.id)}
-                    >
-                      {task.completed ? (
-                        <Check className="h-4 w-4 text-primary" />
-                      ) : (
-                        <Circle className="h-4 w-4 text-gray-400" />
-                      )}
-                    </Button>
-                    <span
-                      className={cn(
-                        'text-sm',
-                        task.completed && 'line-through text-gray-400'
-                      )}
-                    >
-                      {task.description}
-                      <div>
-                        <small className="text-teal-500">
-                          {task.suggestedSchedule}
-                        </small>
-                      </div>
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteTask(task.id)}>
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              <div className="flex items-center p-4">
-                <Input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Add a new task..."
-                  value={newTaskDescription}
-                  onChange={(e) => setNewTaskDescription(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="mr-2"
-                />
-                <Button variant="ghost" size="icon" onClick={handleAddTask}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+          <div className="divide-y divide-gray-200">
+            <div className="flex items-center p-4">
+              <Input
+                ref={inputRef}
+                type="text"
+                placeholder="Add a new task..."
+                value={newTaskDescription}
+                onChange={(e) => setNewTaskDescription(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="mr-2 flex-grow"
+              />
             </div>
-          </ScrollArea>
+            {tasks.map((task) => (
+              <div
+                key={task.id}
+                className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="mr-2 rounded-full h-8 w-8"
+                    onClick={() => handleCompleteTask(task.id)}
+                  >
+                    {task.completed ? (
+                      <Check className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Circle className="h-4 w-4 text-gray-400" />
+                    )}
+                  </Button>
+                  <span
+                    className={cn(
+                      'text-sm',
+                      task.completed && 'line-through text-gray-400'
+                    )}
+                  >
+                    {task.description}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteTask(task.id)}>
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </main>
