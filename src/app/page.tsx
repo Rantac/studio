@@ -191,8 +191,8 @@ export default function Home() {
             </TabsContent>
             <TabsContent value="forex" className="space-y-4">
               <div className="grid gap-4">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="col-span-1">
+                <div className="space-y-2">
+                  <div>
                     <label htmlFor="stopLoss" className="block text-sm font-medium text-gray-700">
                       Stop Loss
                     </label>
@@ -204,7 +204,7 @@ export default function Home() {
                       onChange={(e) => setStopLoss(e.target.value)}
                     />
                   </div>
-                  <div className="col-span-1">
+                  <div>
                     <label htmlFor="entry" className="block text-sm font-medium text-gray-700">
                       Entry
                     </label>
@@ -216,9 +216,7 @@ export default function Home() {
                       onChange={(e) => setEntry(e.target.value)}
                     />
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="col-span-1">
+                  <div>
                     <label htmlFor="takeProfit" className="block text-sm font-medium text-gray-700">
                       Take Profit
                     </label>
@@ -230,7 +228,7 @@ export default function Home() {
                       onChange={(e) => setTakeProfit(e.target.value)}
                     />
                   </div>
-                  <div className="col-span-1">
+                  <div>
                     <label htmlFor="decimalPlaces" className="block text-sm font-medium text-gray-700">
                       Decimal Places
                     </label>
