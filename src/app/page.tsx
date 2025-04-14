@@ -250,9 +250,9 @@ export default function Home() {
         <CardContent className="p-0">
           <Tabs defaultValue="tasks" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="tasks">Tasks</TabsTrigger>
-              <TabsTrigger value="forex">Forex Pips Calculator</TabsTrigger>
-                <TabsTrigger value="crypto">Crypto Position Sizing</TabsTrigger>
+              <TabsTrigger value="tasks">Epic Notes</TabsTrigger>
+              <TabsTrigger value="forex">Pips</TabsTrigger>
+                <TabsTrigger value="crypto">CPS</TabsTrigger>
                 <TabsTrigger value="market">Market Price</TabsTrigger>
             </TabsList>
             <TabsContent value="tasks" className="space-y-4">
@@ -460,4 +460,5 @@ export default function Home() {
     </main>
   );
 }
+
 
