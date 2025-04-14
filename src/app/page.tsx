@@ -43,6 +43,7 @@ export default function Home() {
     const [marketData, setMarketData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [btcPrice, setBtcPrice] = useState<number | null>(null);
 
 
   useEffect(() => {
@@ -201,6 +202,44 @@ export default function Home() {
         fetchMarketData();
     }, []);
 
+    // Market Price API
+    useEffect(() => {
+        const fetchBtcPrice = async () => {
+            try {
+                const url = 'https://coinranking1.p.rapidapi.com/coins?referenceCurrencyUuid=yhjMzLPhuIDl&timePeriod=24h&tiers=1&orderBy=marketCap&orderDirection=desc&limit=50&offset=0';
+                const options = {
+                    method: 'GET',
+                    headers: {
+                        'x-rapidapi-key': 'f0ad4a4797msh17ff46665ba9c66p1e5399jsnd422cb1c94df',
+                        'x-rapidapi-host': 'coinranking1.p.rapidapi.com'
+                    }
+                };
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                // Find Bitcoin's price
+                const btc = result.data.coins.find((coin: any) => coin.symbol === 'BTC');
+                if (btc) {
+                    setBtcPrice(parseFloat(btc.price));
+                } else {
+                    setError('Bitcoin price not found');
+                }
+            } catch (e: any) {
+                setError(e.message);
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBtcPrice();
+        const intervalId = setInterval(fetchBtcPrice, 3600000); // Fetch every 1 hour
+
+        return () => clearInterval(intervalId); // Clean up interval on unmount
+    }, []);
+
 
   return (
     <main className="flex flex-col items-center justify-start min-h-screen bg-secondary p-4 md:p-10">
@@ -252,17 +291,17 @@ export default function Home() {
                     </div>
                   </div>
                 ))}
-                <div className="flex items-center p-4">
-                  <Input
-                    ref={inputRef}
-                    type="text"
-                    placeholder="Add a new task..."
-                    value={newTaskDescription}
-                    onChange={(e) => setNewTaskDescription(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="mr-2 flex-grow"
-                  />
-                </div>
+                 <div className="flex items-center p-4">
+                      <Input
+                        ref={inputRef}
+                        type="text"
+                        placeholder="Add a new task..."
+                        value={newTaskDescription}
+                        onChange={(e) => setNewTaskDescription(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="mr-2 flex-grow"
+                      />
+                    </div>
               </div>
             </TabsContent>
             <TabsContent value="forex" className="space-y-4">
@@ -407,14 +446,12 @@ export default function Home() {
                <TabsContent value="market" className="space-y-4">
                     {loading && <p>Loading market data...</p>}
                     {error && <p className="text-red-500">Error: {error}</p>}
-                    {marketData && (
+                    {btcPrice !== null ? (
                         <div className="grid gap-4">
-                            <p>Total Coins: {marketData.totalCoins}</p>
-                            <p>Total Markets: {marketData.totalMarkets}</p>
-                            <p>Total Exchanges: {marketData.totalExchanges}</p>
-                            <p>Total Market Cap: {marketData.totalMarketCap}</p>
-                            <p>Total 24h Volume: {marketData.total24hVolume}</p>
+                            <p>Bitcoin Price: ${btcPrice.toFixed(2)}</p>
                         </div>
+                    ) : (
+                        <p>Loading Bitcoin price...</p>
                     )}
                 </TabsContent>
           </Tabs>
@@ -423,3 +460,4 @@ export default function Home() {
     </main>
   );
 }
+
