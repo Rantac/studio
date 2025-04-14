@@ -27,9 +27,9 @@ export default function Home() {
   const [entry, setEntry] = useState('');
   const [takeProfit, setTakeProfit] = useState('');
   const [decimalPlaces, setDecimalPlaces] = useState(5); // Default to 5 decimal places
-  const [pipsOfRisk, setPipsOfRisk, setRisk] = useState<number | null>(null);
-  const [pipsOfReward, setPipsOfReward, setReward] = useState<number | null>(null);
-  const [riskRewardRatio, setRiskRewardRatio, setRiskReward] = useState<number | null>(null);
+  const [pipsOfRisk, setPipsOfRisk] = useState<number | null>(null);
+  const [pipsOfReward, setPipsOfReward] = useState<number | null>(null);
+  const [riskRewardRatio, setRiskRewardRatio] = useState<number | null>(null);
 
   useEffect(() => {
     // Load tasks from local storage on component mount
@@ -97,6 +97,9 @@ export default function Home() {
   // Forex calculations
   const calculatePips = () => {
     if (!stopLoss || !entry || !takeProfit) {
+      setPipsOfRisk(null);
+      setPipsOfReward(null);
+      setRiskRewardRatio(null);
       return;
     }
 
@@ -105,6 +108,9 @@ export default function Home() {
     const takeProfitValue = parseFloat(takeProfit);
 
     if (isNaN(stopLossValue) || isNaN(entryValue) || isNaN(takeProfitValue)) {
+      setPipsOfRisk(null);
+      setPipsOfReward(null);
+      setRiskRewardRatio(null);
       return;
     }
 
@@ -186,66 +192,63 @@ export default function Home() {
             <TabsContent value="forex" className="space-y-4">
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <div className="w-1/2">
-                      <label htmlFor="stopLoss" className="block text-sm font-medium text-gray-700">
-                        Stop Loss
-                      </label>
-                      <Input
-                        type="number"
-                        id="stopLoss"
-                        className="mt-1"
-                        value={stopLoss}
-                        onChange={(e) => setStopLoss(e.target.value)}
-                      />
-                    </div>
-                    <div className="w-1/2">
-                      <label htmlFor="entry" className="block text-sm font-medium text-gray-700">
-                        Entry
-                      </label>
-                      <Input
-                        type="number"
-                        id="entry"
-                        className="mt-1"
-                        value={entry}
-                        onChange={(e) => setEntry(e.target.value)}
-                      />
-                    </div>
+                  <div className="mb-4">
+                    <label htmlFor="stopLoss" className="block text-sm font-medium text-gray-700">
+                      Stop Loss
+                    </label>
+                    <Input
+                      type="number"
+                      id="stopLoss"
+                      className="mt-1"
+                      value={stopLoss}
+                      onChange={(e) => setStopLoss(e.target.value)}
+                    />
                   </div>
-                  <div className="flex gap-2">
-                    <div className="w-1/2">
-                      <label htmlFor="takeProfit" className="block text-sm font-medium text-gray-700">
-                        Take Profit
-                      </label>
-                      <Input
-                        type="number"
-                        id="takeProfit"
-                        className="mt-1"
-                        value={takeProfit}
-                        onChange={(e) => setTakeProfit(e.target.value)}
-                      />
-                    </div>
-                    <div className="w-1/2">
-                      <label htmlFor="decimalPlaces" className="block text-sm font-medium text-gray-700">
-                        Decimal Places
-                      </label>
-                      <select
-                        id="decimalPlaces"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        value={decimalPlaces}
-                        onChange={(e) => setDecimalPlaces(parseInt(e.target.value))}
-                      >
-                        <option value={1}>1</option>
-                        <option value={2}>2</option>
-                        <option value={3}>3</option>
-                        <option value={4}>4</option>
-                        <option value={5}>5</option>
-                      </select>
-                    </div>
+                  <div className="mb-4">
+                    <label htmlFor="entry" className="block text-sm font-medium text-gray-700">
+                      Entry
+                    </label>
+                    <Input
+                      type="number"
+                      id="entry"
+                      className="mt-1"
+                      value={entry}
+                      onChange={(e) => setEntry(e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="takeProfit" className="block text-sm font-medium text-gray-700">
+                      Take Profit
+                    </label>
+                    <Input
+                      type="number"
+                      id="takeProfit"
+                      className="mt-1"
+                      value={takeProfit}
+                      onChange={(e) => setTakeProfit(e.target.value)}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="decimalPlaces" className="block text-sm font-medium text-gray-700">
+                      Decimal Places
+                    </label>
+                    <select
+                      id="decimalPlaces"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      value={decimalPlaces}
+                      onChange={(e) => setDecimalPlaces(parseInt(e.target.value))}
+                    >
+                      <option value={1}>1</option>
+                      <option value={2}>2</option>
+                      <option value={3}>3</option>
+                      <option value={4}>4</option>
+                      <option value={5}>5</option>
+                    </select>
                   </div>
                 </div>
                 {pipsOfRisk !== null && pipsOfReward !== null && riskRewardRatio !== null && (
                   <div className="space-y-2">
+                    <p className="text-green-500">Result:</p>
                     <p>Pips of Risk: {pipsOfRisk.toFixed(2)}</p>
                     <p>Pips of Reward: {pipsOfReward.toFixed(2)}</p>
                     <p>Risk/Reward Ratio: {riskRewardRatio.toFixed(2)}</p>
