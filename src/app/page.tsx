@@ -31,6 +31,13 @@ export default function Home() {
   const [pipsOfReward, setPipsOfReward] = useState<number | null>(null);
   const [riskRewardRatio, setRiskRewardRatio] = useState<number | null>(null);
 
+  // Crypto Position Sizing Calculator State
+    const [cryptoEntry, setCryptoEntry] = useState('');
+    const [cryptoSL, setCryptoSL] = useState('');
+    const [cryptoTP, setCryptoTP] = useState('');
+    const [riskPercentage, setRiskPercentage] = useState('');
+    const [positionSize, setPositionSize] = useState<number | null>(null);
+
   useEffect(() => {
     // Load tasks from local storage on component mount
     const storedTasks = localStorage.getItem('tasks');
@@ -127,6 +134,38 @@ export default function Home() {
     calculatePips();
   }, [stopLoss, entry, takeProfit, decimalPlaces]);
 
+    // Crypto Position Sizing Calculation
+    const calculatePositionSize = () => {
+        if (!cryptoEntry || !cryptoSL || !riskPercentage) {
+            setPositionSize(null);
+            return;
+        }
+
+        const entryPrice = parseFloat(cryptoEntry);
+        const stopLossPrice = parseFloat(cryptoSL);
+        const riskPct = parseFloat(riskPercentage) / 100; // Convert percentage to decimal
+
+        if (isNaN(entryPrice) || isNaN(stopLossPrice) || isNaN(riskPct)) {
+            setPositionSize(null);
+            return;
+        }
+
+        // For simplicity, let's assume a $1000 portfolio
+        const portfolioSize = 1000;
+
+        const riskAmount = portfolioSize * riskPct;
+        const priceDifference = Math.abs(entryPrice - stopLossPrice);
+
+        // Calculate position size
+        const calculatedPositionSize = riskAmount / priceDifference;
+
+        setPositionSize(calculatedPositionSize);
+    };
+
+    useEffect(() => {
+        calculatePositionSize();
+    }, [cryptoEntry, cryptoSL, riskPercentage]);
+
 
   return (
     <main className="flex flex-col items-center justify-start min-h-screen bg-secondary p-4 md:p-10">
@@ -136,9 +175,10 @@ export default function Home() {
         </CardHeader>
         <CardContent className="p-0">
           <Tabs defaultValue="tasks" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="tasks">Tasks</TabsTrigger>
               <TabsTrigger value="forex">Forex Pips Calculator</TabsTrigger>
+                <TabsTrigger value="crypto">Crypto Position Sizing</TabsTrigger>
             </TabsList>
             <TabsContent value="tasks" className="space-y-4">
               <div className="divide-y divide-gray-200">
@@ -192,7 +232,7 @@ export default function Home() {
             <TabsContent value="forex" className="space-y-4">
               <div className="grid gap-4">
                 <div className="space-y-2">
-                  <div className="mb-4">
+                  <div className="mb-4 grid grid-cols-1 gap-2">
                     <label htmlFor="stopLoss" className="block text-sm font-medium text-gray-700">
                       Stop Loss
                     </label>
@@ -204,7 +244,7 @@ export default function Home() {
                       onChange={(e) => setStopLoss(e.target.value)}
                     />
                   </div>
-                  <div className="mb-4">
+                  <div className="mb-4 grid grid-cols-1 gap-2">
                     <label htmlFor="entry" className="block text-sm font-medium text-gray-700">
                       Entry
                     </label>
@@ -216,7 +256,7 @@ export default function Home() {
                       onChange={(e) => setEntry(e.target.value)}
                     />
                   </div>
-                  <div className="mb-4">
+                  <div className="mb-4 grid grid-cols-1 gap-2">
                     <label htmlFor="takeProfit" className="block text-sm font-medium text-gray-700">
                       Take Profit
                     </label>
@@ -228,7 +268,7 @@ export default function Home() {
                       onChange={(e) => setTakeProfit(e.target.value)}
                     />
                   </div>
-                  <div className="mb-4">
+                  <div className="mb-4 grid grid-cols-1 gap-2">
                     <label htmlFor="decimalPlaces" className="block text-sm font-medium text-gray-700">
                       Decimal Places
                     </label>
@@ -256,6 +296,66 @@ export default function Home() {
                 )}
               </div>
             </TabsContent>
+              <TabsContent value="crypto" className="space-y-4">
+                  <div className="grid gap-4">
+                      <div className="space-y-2">
+                          <div className="mb-4 grid grid-cols-1 gap-2">
+                              <label htmlFor="cryptoEntry" className="block text-sm font-medium text-gray-700">
+                                  Entry Price
+                              </label>
+                              <Input
+                                  type="number"
+                                  id="cryptoEntry"
+                                  className="mt-1"
+                                  value={cryptoEntry}
+                                  onChange={(e) => setCryptoEntry(e.target.value)}
+                              />
+                          </div>
+                          <div className="mb-4 grid grid-cols-1 gap-2">
+                              <label htmlFor="cryptoSL" className="block text-sm font-medium text-gray-700">
+                                  Stop Loss
+                              </label>
+                              <Input
+                                  type="number"
+                                  id="cryptoSL"
+                                  className="mt-1"
+                                  value={cryptoSL}
+                                  onChange={(e) => setCryptoSL(e.target.value)}
+                              />
+                          </div>
+                          <div className="mb-4 grid grid-cols-1 gap-2">
+                              <label htmlFor="cryptoTP" className="block text-sm font-medium text-gray-700">
+                                  Take Profit (Optional)
+                              </label>
+                              <Input
+                                  type="number"
+                                  id="cryptoTP"
+                                  className="mt-1"
+                                  value={cryptoTP}
+                                  onChange={(e) => setCryptoTP(e.target.value)}
+                              />
+                          </div>
+                          <div className="mb-4 grid grid-cols-1 gap-2">
+                              <label htmlFor="riskPercentage" className="block text-sm font-medium text-gray-700">
+                                  Risk Percentage
+                              </label>
+                              <Input
+                                  type="number"
+                                  id="riskPercentage"
+                                  className="mt-1"
+                                  value={riskPercentage}
+                                  onChange={(e) => setRiskPercentage(e.target.value)}
+                              />
+                          </div>
+                      </div>
+                      {positionSize !== null && (
+                          <div className="space-y-2">
+                              <p className="text-green-500">Result:</p>
+                              <p>Position Size: {positionSize.toFixed(4)}</p>
+                          </div>
+                      )}
+                  </div>
+              </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
