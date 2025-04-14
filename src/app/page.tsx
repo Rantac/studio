@@ -39,6 +39,12 @@ export default function Home() {
     const [positionSize, setPositionSize] = useState<number | null>(null);
     const [accountBalance, setAccountBalance] = useState('');
 
+    // Market Price State
+    const [marketData, setMarketData] = useState<any>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+
   useEffect(() => {
     // Load tasks from local storage on component mount
     const storedTasks = localStorage.getItem('tasks');
@@ -164,6 +170,37 @@ export default function Home() {
         calculatePositionSize();
     }, [cryptoEntry, cryptoSL, riskPercentage, accountBalance]);
 
+    // Market Price API
+    useEffect(() => {
+        const fetchMarketData = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const url = 'https://coinranking1.p.rapidapi.com/stats?referenceCurrencyUuid=yhjMzLPhuIDl';
+                const options = {
+                    method: 'GET',
+                    headers: {
+                        'x-rapidapi-key': 'f0ad4a4797msh17ff46665ba9c66p1e5399jsnd422cb1c94df',
+                        'x-rapidapi-host': 'coinranking1.p.rapidapi.com'
+                    }
+                };
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                setMarketData(result.data);
+            } catch (e: any) {
+                setError(e.message);
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMarketData();
+    }, []);
+
 
   return (
     <main className="flex flex-col items-center justify-start min-h-screen bg-secondary p-4 md:p-10">
@@ -173,10 +210,11 @@ export default function Home() {
         </CardHeader>
         <CardContent className="p-0">
           <Tabs defaultValue="tasks" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="tasks">Tasks</TabsTrigger>
               <TabsTrigger value="forex">Forex Pips Calculator</TabsTrigger>
                 <TabsTrigger value="crypto">Crypto Position Sizing</TabsTrigger>
+                <TabsTrigger value="market">Market Price</TabsTrigger>
             </TabsList>
             <TabsContent value="tasks" className="space-y-4">
               <div className="divide-y divide-gray-200">
@@ -366,10 +404,22 @@ export default function Home() {
                       )}
                   </div>
               </TabsContent>
+               <TabsContent value="market" className="space-y-4">
+                    {loading && <p>Loading market data...</p>}
+                    {error && <p className="text-red-500">Error: {error}</p>}
+                    {marketData && (
+                        <div className="grid gap-4">
+                            <p>Total Coins: {marketData.totalCoins}</p>
+                            <p>Total Markets: {marketData.totalMarkets}</p>
+                            <p>Total Exchanges: {marketData.totalExchanges}</p>
+                            <p>Total Market Cap: {marketData.totalMarketCap}</p>
+                            <p>Total 24h Volume: {marketData.total24hVolume}</p>
+                        </div>
+                    )}
+                </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
     </main>
   );
 }
-
