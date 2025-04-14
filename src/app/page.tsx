@@ -92,17 +92,6 @@ export default function Home() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="divide-y divide-gray-200">
-            <div className="flex items-center p-4">
-              <Input
-                ref={inputRef}
-                type="text"
-                placeholder="Add a new task..."
-                value={newTaskDescription}
-                onChange={(e) => setNewTaskDescription(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="mr-2 flex-grow"
-              />
-            </div>
             {tasks.map((task) => (
               <div
                 key={task.id}
@@ -137,6 +126,17 @@ export default function Home() {
                 </div>
               </div>
             ))}
+            <div className="flex items-center p-4">
+              <Input
+                ref={inputRef}
+                type="text"
+                placeholder="Add a new task..."
+                value={newTaskDescription}
+                onChange={(e) => setNewTaskDescription(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="mr-2 flex-grow"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
