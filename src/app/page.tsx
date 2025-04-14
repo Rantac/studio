@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Check, Circle, Plus, Trash} from 'lucide-react';
@@ -11,6 +11,7 @@ import {Textarea} from '@/components/ui/textarea';
 import {Label} from '@/components/ui/label';
 import {ScrollArea} from '@/components/ui/scroll-area';
 import {suggestSchedule} from '@/ai/flows/smart-schedule';
+import {Input} from '@/components/ui/input';
 
 interface Task {
   id: string;
@@ -22,8 +23,8 @@ interface Task {
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskDescription, setNewTaskDescription] = useState('');
-  const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const {toast} = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Load tasks from local storage on component mount
@@ -53,7 +54,7 @@ export default function Home() {
         };
         setTasks([...tasks, newTask]);
         setNewTaskDescription('');
-        setIsCreateTaskOpen(false);
+        inputRef.current?.focus(); // Refocus on the input field
         toast({
           title: 'Task Added!',
           description: 'Your task has been successfully added to the list.',
@@ -86,44 +87,17 @@ export default function Home() {
     setTasks(tasks.filter((task) => task.id !== id));
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleAddTask();
+    }
+  };
+
   return (
     <main className="flex flex-col items-center justify-start min-h-screen bg-secondary p-4 md:p-10">
       <Card className="w-full max-w-md space-y-4 bg-white shadow-md rounded-lg">
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
           <CardTitle className="text-xl font-semibold">TaskFlow</CardTitle>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Task
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Add New Task</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Enter the task description.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Enter task description"
-                    value={newTaskDescription}
-                    onChange={(e) => setNewTaskDescription(e.target.value)}
-                  />
-                </div>
-              </div>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleAddTask}>
-                  Add
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[300px] w-full">
@@ -161,33 +135,26 @@ export default function Home() {
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Are you absolutely sure?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete the task from your list.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteTask(task.id)}>
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteTask(task.id)}>
+                      <Trash className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}
+              <div className="flex items-center p-4">
+                <Input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Add a new task..."
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="mr-2"
+                />
+                <Button variant="ghost" size="icon" onClick={handleAddTask}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </ScrollArea>
         </CardContent>
