@@ -37,6 +37,7 @@ export default function Home() {
     const [cryptoTP, setCryptoTP] = useState('');
     const [riskPercentage, setRiskPercentage] = useState('');
     const [positionSize, setPositionSize] = useState<number | null>(null);
+    const [accountBalance, setAccountBalance] = useState('');
 
   useEffect(() => {
     // Load tasks from local storage on component mount
@@ -136,7 +137,7 @@ export default function Home() {
 
     // Crypto Position Sizing Calculation
     const calculatePositionSize = () => {
-        if (!cryptoEntry || !cryptoSL || !riskPercentage) {
+        if (!cryptoEntry || !cryptoSL || !riskPercentage || !accountBalance) {
             setPositionSize(null);
             return;
         }
@@ -144,19 +145,16 @@ export default function Home() {
         const entryPrice = parseFloat(cryptoEntry);
         const stopLossPrice = parseFloat(cryptoSL);
         const riskPct = parseFloat(riskPercentage) / 100; // Convert percentage to decimal
+        const accountValue = parseFloat(accountBalance);
 
-        if (isNaN(entryPrice) || isNaN(stopLossPrice) || isNaN(riskPct)) {
+        if (isNaN(entryPrice) || isNaN(stopLossPrice) || isNaN(riskPct) || isNaN(accountValue)) {
             setPositionSize(null);
             return;
         }
 
-        // For simplicity, let's assume a $1000 portfolio
-        const portfolioSize = 1000;
-
-        const riskAmount = portfolioSize * riskPct;
+        const riskAmount = accountValue * riskPct;
         const priceDifference = Math.abs(entryPrice - stopLossPrice);
 
-        // Calculate position size
         const calculatedPositionSize = riskAmount / priceDifference;
 
         setPositionSize(calculatedPositionSize);
@@ -164,7 +162,7 @@ export default function Home() {
 
     useEffect(() => {
         calculatePositionSize();
-    }, [cryptoEntry, cryptoSL, riskPercentage]);
+    }, [cryptoEntry, cryptoSL, riskPercentage, accountBalance]);
 
 
   return (
@@ -300,6 +298,18 @@ export default function Home() {
                   <div className="grid gap-4">
                       <div className="space-y-2">
                           <div className="mb-4 grid grid-cols-1 gap-2">
+                              <label htmlFor="accountBalance" className="block text-sm font-medium text-gray-700">
+                                  Account Balance
+                              </label>
+                              <Input
+                                  type="number"
+                                  id="accountBalance"
+                                  className="mt-1"
+                                  value={accountBalance}
+                                  onChange={(e) => setAccountBalance(e.target.value)}
+                              />
+                          </div>
+                          <div className="mb-4 grid grid-cols-1 gap-2">
                               <label htmlFor="cryptoEntry" className="block text-sm font-medium text-gray-700">
                                   Entry Price
                               </label>
@@ -362,3 +372,4 @@ export default function Home() {
     </main>
   );
 }
+
