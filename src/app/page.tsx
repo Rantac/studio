@@ -261,7 +261,7 @@ export default function Home() {
               <TabsTrigger value="tasks">Epic Notes</TabsTrigger>
               <TabsTrigger value="forex">Pips</TabsTrigger>
                 <TabsTrigger value="crypto">CPS</TabsTrigger>
-                <TabsTrigger value="market">Market Price</TabsTrigger>
+                <TabsTrigger value="market">Market</TabsTrigger>
             </TabsList>
             <TabsContent value="tasks" className="space-y-4">
               <div className="divide-y divide-gray-200">
@@ -456,11 +456,11 @@ export default function Home() {
                     {loading && <p>Loading market data...</p>}
                     {error && <p className="text-red-500">Error: {error}</p>}
                     <div className="grid gap-4">
-                        <p>BTC Price: {coinPrices.BTC !== null ? `$${coinPrices.BTC.toFixed(2)}` : 'Loading...'}</p>
-                        <p>ETH Price: {coinPrices.ETH !== null ? `$${coinPrices.ETH.toFixed(2)}` : 'Loading...'}</p>
-                        <p>Binance Coin Price: {coinPrices.BNB !== null ? `$${coinPrices.BNB.toFixed(2)}` : 'Loading...'}</p>
-                        <p>Solana Price: {coinPrices.SOL !== null ? `$${coinPrices.SOL.toFixed(2)}` : 'Loading...'}</p>
-                        <p>Toncoin Price: {coinPrices.TON !== null ? `$${coinPrices.TON.toFixed(2)}` : 'Loading...'}</p>
+                        <p>BTC: {coinPrices.BTC !== null ? `$${coinPrices.BTC.toFixed(2)}` : 'Loading...'}</p>
+                        <p>ETH: {coinPrices.ETH !== null ? `$${coinPrices.ETH.toFixed(2)}` : 'Loading...'}</p>
+                        <p>BNB: {coinPrices.BNB !== null ? `$${coinPrices.BNB.toFixed(2)}` : 'Loading...'}</p>
+                        <p>SOL: {coinPrices.SOL !== null ? `$${coinPrices.SOL.toFixed(2)}` : 'Loading...'}</p>
+                        <p>TON: {coinPrices.TON !== null ? `$${coinPrices.TON.toFixed(2)}` : 'Loading...'}</p>
                     </div>
                 </TabsContent>
           </Tabs>
@@ -469,4 +469,3 @@ export default function Home() {
     </main>
   );
 }
-
