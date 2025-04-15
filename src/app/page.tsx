@@ -456,8 +456,8 @@ export default function Home() {
                     {loading && <p>Loading market data...</p>}
                     {error && <p className="text-red-500">Error: {error}</p>}
                     <div className="grid gap-4">
-                        <p>Bitcoin Price: {coinPrices.BTC !== null ? `$${coinPrices.BTC.toFixed(2)}` : 'Loading...'}</p>
-                        <p>Ethereum Price: {coinPrices.ETH !== null ? `$${coinPrices.ETH.toFixed(2)}` : 'Loading...'}</p>
+                        <p>BTC Price: {coinPrices.BTC !== null ? `$${coinPrices.BTC.toFixed(2)}` : 'Loading...'}</p>
+                        <p>ETH Price: {coinPrices.ETH !== null ? `$${coinPrices.ETH.toFixed(2)}` : 'Loading...'}</p>
                         <p>Binance Coin Price: {coinPrices.BNB !== null ? `$${coinPrices.BNB.toFixed(2)}` : 'Loading...'}</p>
                         <p>Solana Price: {coinPrices.SOL !== null ? `$${coinPrices.SOL.toFixed(2)}` : 'Loading...'}</p>
                         <p>Toncoin Price: {coinPrices.TON !== null ? `$${coinPrices.TON.toFixed(2)}` : 'Loading...'}</p>
@@ -469,3 +469,4 @@ export default function Home() {
     </main>
   );
 }
+
