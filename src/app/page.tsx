@@ -177,35 +177,6 @@ export default function Home() {
             setLoading(true);
             setError(null);
             try {
-                const url = 'https://coinranking1.p.rapidapi.com/stats?referenceCurrencyUuid=yhjMzLPhuIDl';
-                const options = {
-                    method: 'GET',
-                    headers: {
-                        'x-rapidapi-key': 'f0ad4a4797msh17ff46665ba9c66p1e5399jsnd422cb1c94df',
-                        'x-rapidapi-host': 'coinranking1.p.rapidapi.com'
-                    }
-                };
-                const response = await fetch(url, options);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const result = await response.json();
-                setMarketData(result.data);
-            } catch (e: any) {
-                setError(e.message);
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchMarketData();
-    }, []);
-
-    // Market Price API
-    useEffect(() => {
-        const fetchBtcPrice = async () => {
-            try {
                 const url = 'https://coinranking1.p.rapidapi.com/coins?referenceCurrencyUuid=yhjMzLPhuIDl&timePeriod=24h&tiers=1&orderBy=marketCap&orderDirection=desc&limit=50&offset=0';
                 const options = {
                     method: 'GET',
@@ -234,8 +205,8 @@ export default function Home() {
             }
         };
 
-        fetchBtcPrice();
-        const intervalId = setInterval(fetchBtcPrice, 3600000); // Fetch every 1 hour
+        fetchMarketData();
+        const intervalId = setInterval(fetchMarketData, 3600000); // Fetch every 1 hour
 
         return () => clearInterval(intervalId); // Clean up interval on unmount
     }, []);
@@ -291,7 +262,9 @@ export default function Home() {
                     </div>
                   </div>
                 ))}
-                 <div className="flex items-center p-4">
+                 
+              </div>
+               <div className="flex items-center p-4">
                       <Input
                         ref={inputRef}
                         type="text"
@@ -302,7 +275,6 @@ export default function Home() {
                         className="mr-2 flex-grow"
                       />
                     </div>
-              </div>
             </TabsContent>
             <TabsContent value="forex" className="space-y-4">
               <div className="grid gap-4">
@@ -460,5 +432,3 @@ export default function Home() {
     </main>
   );
 }
-
-
