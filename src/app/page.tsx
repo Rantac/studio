@@ -57,6 +57,37 @@ export default function Home() {
         TON: null,
     });
 
+    const [waitingPrices, setWaitingPrices] = useState<{
+        BTC: number | null;
+        ETH: number | null;
+        BNB: number | null;
+        SOL: number | null;
+        TON: number | null;
+    }>({
+        BTC: null,
+        ETH: null,
+        BNB: null,
+        SOL: null,
+        TON: null,
+    });
+
+    const getStatus = (coin: string) => {
+        const marketPrice = coinPrices[coin as keyof typeof coinPrices] || 0;
+        const waitingPrice = waitingPrices[coin as keyof typeof waitingPrices] || 0;
+
+        if (!marketPrice || !waitingPrice) return null; // No status if either is missing
+
+        const diff = marketPrice - waitingPrice;
+
+        if (diff > 0) {
+            return 'Above';
+        } else if (diff < 0) {
+            return 'Below';
+        } else {
+            return 'Equal';
+        }
+    };
+
 
   useEffect(() => {
     // Load tasks from local storage on component mount
@@ -456,11 +487,66 @@ export default function Home() {
                     {loading && <p>Loading market data...</p>}
                     {error && <p className="text-red-500">Error: {error}</p>}
                     <div className="grid gap-4">
-                        <p>BTC: {coinPrices.BTC !== null ? `$${coinPrices.BTC.toFixed(2)}` : 'Loading...'}</p>
-                        <p>ETH: {coinPrices.ETH !== null ? `$${coinPrices.ETH.toFixed(2)}` : 'Loading...'}</p>
-                        <p>BNB: {coinPrices.BNB !== null ? `$${coinPrices.BNB.toFixed(2)}` : 'Loading...'}</p>
-                        <p>SOL: {coinPrices.SOL !== null ? `$${coinPrices.SOL.toFixed(2)}` : 'Loading...'}</p>
-                        <p>TON: {coinPrices.TON !== null ? `$${coinPrices.TON.toFixed(2)}` : 'Loading...'}</p>
+                        <div>
+                            <p>BTC: {coinPrices.BTC !== null ? `$${coinPrices.BTC.toFixed(2)}` : 'Loading...'}</p>
+                            <Input
+                                type="number"
+                                placeholder="Waiting Price"
+                                value={waitingPrices.BTC || ''}
+                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, BTC: parseFloat(e.target.value) }))}
+                            />
+                            {waitingPrices.BTC && coinPrices.BTC && (
+                                <p>Status: {getStatus('BTC')}</p>
+                            )}
+                        </div>
+                        <div>
+                            <p>ETH: {coinPrices.ETH !== null ? `$${coinPrices.ETH.toFixed(2)}` : 'Loading...'}</p>
+                            <Input
+                                type="number"
+                                placeholder="Waiting Price"
+                                value={waitingPrices.ETH || ''}
+                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, ETH: parseFloat(e.target.value) }))}
+                            />
+                            {waitingPrices.ETH && coinPrices.ETH && (
+                                <p>Status: {getStatus('ETH')}</p>
+                            )}
+                        </div>
+                        <div>
+                            <p>BNB: {coinPrices.BNB !== null ? `$${coinPrices.BNB.toFixed(2)}` : 'Loading...'}</p>
+                            <Input
+                                type="number"
+                                placeholder="Waiting Price"
+                                value={waitingPrices.BNB || ''}
+                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, BNB: parseFloat(e.target.value) }))}
+                            />
+                            {waitingPrices.BNB && coinPrices.BNB && (
+                                <p>Status: {getStatus('BNB')}</p>
+                            )}
+                        </div>
+                        <div>
+                            <p>SOL: {coinPrices.SOL !== null ? `$${coinPrices.SOL.toFixed(2)}` : 'Loading...'}</p>
+                            <Input
+                                type="number"
+                                placeholder="Waiting Price"
+                                value={waitingPrices.SOL || ''}
+                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, SOL: parseFloat(e.target.value) }))}
+                            />
+                            {waitingPrices.SOL && coinPrices.SOL && (
+                                <p>Status: {getStatus('SOL')}</p>
+                            )}
+                        </div>
+                        <div>
+                            <p>TON: {coinPrices.TON !== null ? `$${coinPrices.TON.toFixed(2)}` : 'Loading...'}</p>
+                            <Input
+                                type="number"
+                                placeholder="Waiting Price"
+                                value={waitingPrices.TON || ''}
+                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, TON: parseFloat(e.target.value) }))}
+                            />
+                            {waitingPrices.TON && coinPrices.TON && (
+                                <p>Status: {getStatus('TON')}</p>
+                            )}
+                        </div>
                     </div>
                 </TabsContent>
           </Tabs>
@@ -469,3 +555,4 @@ export default function Home() {
     </main>
   );
 }
+
