@@ -43,7 +43,19 @@ export default function Home() {
     const [marketData, setMarketData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [btcPrice, setBtcPrice] = useState<number | null>(null);
+    const [coinPrices, setCoinPrices] = useState<{
+        BTC: number | null;
+        ETH: number | null;
+        BNB: number | null;
+        SOL: number | null;
+        TON: number | null;
+    }>({
+        BTC: null,
+        ETH: null,
+        BNB: null,
+        SOL: null,
+        TON: null,
+    });
 
 
   useEffect(() => {
@@ -192,10 +204,35 @@ export default function Home() {
                 const result = await response.json();
                 // Find Bitcoin's price
                 const btc = result.data.coins.find((coin: any) => coin.symbol === 'BTC');
+                const eth = result.data.coins.find((coin: any) => coin.symbol === 'ETH');
+                const bnb = result.data.coins.find((coin: any) => coin.symbol === 'BNB');
+                const sol = result.data.coins.find((coin: any) => coin.symbol === 'SOL');
+                const ton = result.data.coins.find((coin: any) => coin.symbol === 'TON');
+
                 if (btc) {
-                    setBtcPrice(parseFloat(btc.price));
+                    setCoinPrices(prev => ({ ...prev, BTC: parseFloat(btc.price) }));
                 } else {
                     setError('Bitcoin price not found');
+                }
+                 if (eth) {
+                    setCoinPrices(prev => ({ ...prev, ETH: parseFloat(eth.price) }));
+                } else {
+                    setError('Ethereum price not found');
+                }
+                 if (bnb) {
+                    setCoinPrices(prev => ({ ...prev, BNB: parseFloat(bnb.price) }));
+                } else {
+                    setError('Binance Coin price not found');
+                }
+                 if (sol) {
+                    setCoinPrices(prev => ({ ...prev, SOL: parseFloat(sol.price) }));
+                } else {
+                    setError('Solana price not found');
+                }
+                  if (ton) {
+                    setCoinPrices(prev => ({ ...prev, TON: parseFloat(ton.price) }));
+                } else {
+                    setError('Toncoin price not found');
                 }
             } catch (e: any) {
                 setError(e.message);
@@ -418,13 +455,13 @@ export default function Home() {
                <TabsContent value="market" className="space-y-4">
                     {loading && <p>Loading market data...</p>}
                     {error && <p className="text-red-500">Error: {error}</p>}
-                    {btcPrice !== null ? (
-                        <div className="grid gap-4">
-                            <p>Bitcoin Price: ${btcPrice.toFixed(2)}</p>
-                        </div>
-                    ) : (
-                        <p>Loading Bitcoin price...</p>
-                    )}
+                    <div className="grid gap-4">
+                        <p>Bitcoin Price: {coinPrices.BTC !== null ? `$${coinPrices.BTC.toFixed(2)}` : 'Loading...'}</p>
+                        <p>Ethereum Price: {coinPrices.ETH !== null ? `$${coinPrices.ETH.toFixed(2)}` : 'Loading...'}</p>
+                        <p>Binance Coin Price: {coinPrices.BNB !== null ? `$${coinPrices.BNB.toFixed(2)}` : 'Loading...'}</p>
+                        <p>Solana Price: {coinPrices.SOL !== null ? `$${coinPrices.SOL.toFixed(2)}` : 'Loading...'}</p>
+                        <p>Toncoin Price: {coinPrices.TON !== null ? `$${coinPrices.TON.toFixed(2)}` : 'Loading...'}</p>
+                    </div>
                 </TabsContent>
           </Tabs>
         </CardContent>
