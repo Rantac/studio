@@ -58,11 +58,11 @@ export default function Home() {
     });
 
     const [waitingPrices, setWaitingPrices] = useState<{
-        BTC: number | null;
-        ETH: number | null;
-        BNB: number | null;
-        SOL: number | null;
-        TON: number | null;
+        BTC: string | null;
+        ETH: string | null;
+        BNB: string | null;
+        SOL: string | null;
+        TON: string | null;
     }>({
         BTC: null,
         ETH: null,
@@ -73,18 +73,24 @@ export default function Home() {
 
     const getStatus = (coin: string) => {
         const marketPrice = coinPrices[coin as keyof typeof coinPrices] || 0;
-        const waitingPrice = waitingPrices[coin as keyof typeof waitingPrices] || 0;
-
-        if (!marketPrice || !waitingPrice) return null; // No status if either is missing
-
-        const diff = marketPrice - waitingPrice;
-
-        if (diff > 0) {
+        const waitingPrice = waitingPrices[coin as keyof typeof waitingPrices] || '';
+      
+        if (!marketPrice || !waitingPrice) return null;
+      
+        // Extract low and high prices from the waiting price string
+        const [lowStr, highStr] = waitingPrice.split('-').map(s => s.trim());
+      
+        const low = parseFloat(lowStr);
+        const high = parseFloat(highStr);
+      
+        if (isNaN(low) || isNaN(high)) return 'Invalid range';
+      
+        if (marketPrice > high) {
             return 'Above';
-        } else if (diff < 0) {
+        } else if (marketPrice < low) {
             return 'Below';
         } else {
-            return 'Equal';
+            return 'Within';
         }
     };
 
@@ -490,10 +496,10 @@ export default function Home() {
                         <div>
                             <p>BTC: {coinPrices.BTC !== null ? `$${coinPrices.BTC.toFixed(2)}` : 'Loading...'}</p>
                             <Input
-                                type="number"
-                                placeholder="Waiting Price"
+                                type="text"
+                                placeholder="Waiting Price (e.g., 20000-21000)"
                                 value={waitingPrices.BTC || ''}
-                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, BTC: parseFloat(e.target.value) }))}
+                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, BTC: e.target.value }))}
                             />
                             {waitingPrices.BTC && coinPrices.BTC && (
                                 <p>Status: {getStatus('BTC')}</p>
@@ -502,10 +508,10 @@ export default function Home() {
                         <div>
                             <p>ETH: {coinPrices.ETH !== null ? `$${coinPrices.ETH.toFixed(2)}` : 'Loading...'}</p>
                             <Input
-                                type="number"
-                                placeholder="Waiting Price"
+                                type="text"
+                                placeholder="Waiting Price (e.g., 1500-1600)"
                                 value={waitingPrices.ETH || ''}
-                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, ETH: parseFloat(e.target.value) }))}
+                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, ETH: e.target.value }))}
                             />
                             {waitingPrices.ETH && coinPrices.ETH && (
                                 <p>Status: {getStatus('ETH')}</p>
@@ -514,10 +520,10 @@ export default function Home() {
                         <div>
                             <p>BNB: {coinPrices.BNB !== null ? `$${coinPrices.BNB.toFixed(2)}` : 'Loading...'}</p>
                             <Input
-                                type="number"
-                                placeholder="Waiting Price"
+                                type="text"
+                                placeholder="Waiting Price (e.g., 250-260)"
                                 value={waitingPrices.BNB || ''}
-                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, BNB: parseFloat(e.target.value) }))}
+                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, BNB: e.target.value }))}
                             />
                             {waitingPrices.BNB && coinPrices.BNB && (
                                 <p>Status: {getStatus('BNB')}</p>
@@ -526,10 +532,10 @@ export default function Home() {
                         <div>
                             <p>SOL: {coinPrices.SOL !== null ? `$${coinPrices.SOL.toFixed(2)}` : 'Loading...'}</p>
                             <Input
-                                type="number"
-                                placeholder="Waiting Price"
+                                type="text"
+                                placeholder="Waiting Price (e.g., 20-21)"
                                 value={waitingPrices.SOL || ''}
-                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, SOL: parseFloat(e.target.value) }))}
+                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, SOL: e.target.value }))}
                             />
                             {waitingPrices.SOL && coinPrices.SOL && (
                                 <p>Status: {getStatus('SOL')}</p>
@@ -538,10 +544,10 @@ export default function Home() {
                         <div>
                             <p>TON: {coinPrices.TON !== null ? `$${coinPrices.TON.toFixed(2)}` : 'Loading...'}</p>
                             <Input
-                                type="number"
-                                placeholder="Waiting Price"
+                                type="text"
+                                placeholder="Waiting Price (e.g., 2-2.1)"
                                 value={waitingPrices.TON || ''}
-                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, TON: parseFloat(e.target.value) }))}
+                                onChange={(e) => setWaitingPrices(prev => ({ ...prev, TON: e.target.value }))}
                             />
                             {waitingPrices.TON && coinPrices.TON && (
                                 <p>Status: {getStatus('TON')}</p>
@@ -555,4 +561,3 @@ export default function Home() {
     </main>
   );
 }
-
