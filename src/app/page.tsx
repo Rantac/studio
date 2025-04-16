@@ -101,12 +101,21 @@ export default function Home() {
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
     }
+
+       // Load waiting prices from local storage on component mount
+        const storedWaitingPrices = localStorage.getItem('waitingPrices');
+        if (storedWaitingPrices) {
+            setWaitingPrices(JSON.parse(storedWaitingPrices));
+        }
   }, []);
 
   useEffect(() => {
     // Save tasks to local storage whenever the tasks state changes
     localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, [tasks]);
+
+     // Save waiting prices to local storage whenever the waitingPrices state changes
+        localStorage.setItem('waitingPrices', JSON.stringify(waitingPrices));
+  }, [tasks, waitingPrices]);
 
   const handleAddTask = async () => {
     if (newTaskDescription.trim() !== '') {
