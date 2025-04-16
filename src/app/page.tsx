@@ -282,7 +282,7 @@ export default function Home() {
                 }
             } catch (e: any) {
                 setError(e.message);
-                console.error(e);
+                console.error("Market Price Fetch Error:", e);
             } finally {
                 setLoading(false);
             }
@@ -317,9 +317,12 @@ export default function Home() {
         // Function to send notification
         const sendNotification = (coin: string, price: number) => {
             if (typeof window !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('Price Alert!', {
-                    body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-                    icon: '/favicon.ico',
+                // Use ServiceWorkerRegistration.showNotification() for push notifications
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification('Price Alert!', {
+                        body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
+                        icon: '/favicon.ico',
+                    });
                 });
             }
         };
@@ -631,3 +634,4 @@ export default function Home() {
         </main>
     );
 }
+
