@@ -418,7 +418,7 @@ export default function Home() {
                                 />
                             </div>
                         </TabsContent>
-                        <TabsContent value="Pips" className="space-y-4">
+                        <TabsContent value="Pips" className="space-y-4 p-4">
                             <div className="grid gap-4">
                                 <div className="space-y-2">
                                     <div className="mb-4 grid grid-cols-1 gap-2">
@@ -488,7 +488,7 @@ export default function Home() {
                                 )}
                             </div>
                         </TabsContent>
-                        <TabsContent value="Crypto" className="space-y-4">
+                        <TabsContent value="Crypto" className="space-y-4 p-4">
                             <div className="grid gap-4">
                                 <div className="space-y-2">
                                     <div className="mb-4 grid grid-cols-1 gap-2">
@@ -565,7 +565,7 @@ export default function Home() {
                                 )}
                             </div>
                         </TabsContent>
-                        <TabsContent value="Market" className="space-y-4">
+                        <TabsContent value="Market" className="space-y-4 p-4">
                             {loading && <p>Loading market data...</p>}
                             {error && <p className="text-red-500">Error: {error}</p>}
                             <div className="grid gap-4">
