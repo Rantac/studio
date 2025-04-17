@@ -318,38 +318,61 @@ export default function Home() {
         return () => clearInterval(intervalId); // Clean up interval on unmount
     }, []);
 
+
     useEffect(() => {
         const requestNotificationPermission = async () => {
             if (typeof window !== 'undefined') {
-                try {
-                    const permission = await Notification.requestPermission();
-                    if (permission === 'granted') {
-                        console.log('Notification permission granted.');
-                    } else if (permission === 'denied') {
-                        console.log('Notification permission denied.');
-                    } else {
-                        console.log('Notification permission pending...');
+                if (Notification.permission === 'default') {
+                    try {
+                        const permission = await Notification.requestPermission();
+                        console.log(`Notification permission ${permission}.`);
+                    } catch (error) {
+                        console.error("Error requesting notification permission:", error);
                     }
-                } catch (error: any) {
-                    console.error("Error requesting notification permission:", error);
+                } else if (Notification.permission === 'granted') {
+                    console.log("Notification permission granted.");
                 }
             }
         };
 
+        requestNotificationPermission();
+    }, []);
 
     useEffect(() => {
         // Function to send notification
         const sendNotification = (coin: string, price: number) => {
             if (typeof window !== 'undefined' && Notification.permission === 'granted') {
-                // Use ServiceWorkerRegistration.showNotification() for push notifications
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.showNotification('Price Alert!', {
-                        body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-                        icon: '/favicon.ico',
-                    });
-                }).catch(error => {
-                    console.error("Service worker registration failed:", error);
-                });
+                const notificationTitle = 'Price Alert!';
+                const notificationOptions = {
+                    body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
+                    icon: '/favicon.ico',
+                };
+
+                if (isMobile()) {
+                    // Mobile: Use Service Worker
+                    console.log("Sending notification via Service Worker");
+                    if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+                        navigator.serviceWorker.ready.then(registration => {
+                            console.log("Service Worker Registration is ready: ", registration);
+                            if (registration.showNotification) {
+                                registration.showNotification(notificationTitle, notificationOptions)
+                                    .then(() => console.log('Browser notification sent (Service Worker)'))
+                                    .catch(err => console.error('Service Worker notification error:', err));
+                            } else {
+                                console.warn('showNotification not supported in this Service Worker.');
+                            }
+                        }).catch(error => {
+                            console.error("Service Worker ready failed:", error);
+                        });
+                    } else {
+                        console.warn('Service Worker not available.');
+                    }
+                } else {
+                    // Desktop: Use regular Notification API
+                    console.log("Sending notification via regular Notification API");
+                    new Notification(notificationTitle, notificationOptions);
+                    console.log("Browser notification sent (Notification API)"); // Log: Notification sent
+                }
             }
         };
 
@@ -374,60 +397,6 @@ export default function Home() {
         checkWaitingPrices();
     }, [coinPrices, waitingPrices]);
 
-    const requestNotificationPermission = async () => {
-        if (typeof window !== 'undefined') {
-            if (Notification.permission === 'default') {
-                try {
-                    const permission = await Notification.requestPermission();
-                    console.log(`Notification permission ${permission}.`);
-                } catch (error) {
-                    console.error("Error requesting notification permission:", error);
-                }
-            } else if (Notification.permission === 'granted') {
-                console.log("Notification permission granted.");
-            }
-        }
-    };
-
-    const sendNotification = (coin: string, price: number) => {
-        if (typeof window !== 'undefined') {
-            console.log("sendNotification called"); // Log: Function called
-            console.log("Navigator userAgent:", navigator.userAgent); // Log: User agent
-
-            const notificationTitle = 'Price Alert!';
-            const notificationOptions = {
-                body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-                icon: '/favicon.ico',
-            };
-
-            if (isMobile()) {
-                // Mobile: Use Service Worker
-                console.log("Sending notification via Service Worker");
-                if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
-                    navigator.serviceWorker.ready.then(registration => {
-                        console.log("Service Worker Registration is ready: ", registration);
-                        if (registration.showNotification) {
-                            registration.showNotification(notificationTitle, notificationOptions)
-                                .then(() => console.log('Browser notification sent (Service Worker)'))
-                                .catch(err => console.error('Service Worker notification error:', err));
-                        } else {
-                            console.warn('showNotification not supported in this Service Worker.');
-                        }
-                    }).catch(error => {
-                        console.error("Service Worker ready failed:", error);
-                    });
-                } else {
-                    console.warn('Service Worker not available.');
-                }
-            } else {
-                // Desktop: Use regular Notification API
-                console.log("Sending notification via regular Notification API");
-                new Notification(notificationTitle, notificationOptions);
-                console.log("Browser notification sent (Notification API)"); // Log: Notification sent
-            }
-        }
-    };
-
 
     return (
         <main className="flex flex-col items-center justify-start min-h-screen bg-secondary p-4 md:p-10">
@@ -438,10 +407,10 @@ export default function Home() {
                 <CardContent className="p-0">
                     <Tabs defaultValue="Epic Notes" className="w-full">
                         <TabsList className="grid w-full grid-cols-4">
-                            <TabsTrigger value="tasks">Epic Notes</TabsTrigger>
-                            <TabsTrigger value="forex">Pips</TabsTrigger>
-                            <TabsTrigger value="crypto">Crypto</TabsTrigger>
-                            <TabsTrigger value="market">Market</TabsTrigger>
+                            <TabsTrigger value="Epic Notes">Epic Notes</TabsTrigger>
+                            <TabsTrigger value="Pips">Pips</TabsTrigger>
+                            <TabsTrigger value="Crypto">Crypto</TabsTrigger>
+                            <TabsTrigger value="Market">Market</TabsTrigger>
                         </TabsList>
                         <TabsContent value="Epic Notes" className="space-y-4">
                             <div className="divide-y divide-gray-200">
