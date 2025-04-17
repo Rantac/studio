@@ -320,7 +320,7 @@ export default function Home() {
     }, [coinPrices, waitingPrices]);
 
     const requestNotificationPermission = async () => {
-        if (typeof window !== 'undefined' && 'Notification' in window) {
+        if (typeof window !== 'undefined') {
             if (Notification.permission === 'default') {
                 try {
                     const permission = await Notification.requestPermission();
@@ -335,11 +335,27 @@ export default function Home() {
     };
 
     const sendNotification = (coin: string, price: number) => {
-        if (typeof window !== 'undefined' && Notification.permission === 'granted') {
-            new Notification('Price Alert!', {
-                body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-                icon: '/favicon.ico',
-            });
+        if (typeof window !== 'undefined') {
+            if (typeof navigator !== 'undefined' && navigator.userAgent.includes('Mobile')) {
+                // Mobile: Use Service Worker
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'PRICE_ALERT',
+                        payload: {
+                            coin,
+                            price,
+                        },
+                    });
+                }
+            } else {
+                // Web: Use Browser Notifications API
+                if (Notification.permission === 'granted') {
+                    new Notification('Price Alert!', {
+                        body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
+                        icon: '/favicon.ico',
+                    });
+                }
+            }
         }
     };
 
