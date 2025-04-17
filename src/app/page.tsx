@@ -331,6 +331,17 @@ export default function Home() {
             } else if (Notification.permission === 'granted') {
                 console.log("Notification permission granted.");
             }
+
+             // Register service worker for mobile devices
+             if ('serviceWorker' in navigator) {
+                try {
+                    // Ensure the service worker file is in the public directory
+                    const registration = await navigator.serviceWorker.register('/service-worker.js');
+                    console.log('Service worker registered successfully:', registration);
+                } catch (error) {
+                    console.error('Service worker registration failed:', error);
+                }
+            }
         }
     };
 
