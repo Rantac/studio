@@ -336,9 +336,15 @@ export default function Home() {
 
     const sendNotification = (coin: string, price: number) => {
         if (typeof window !== 'undefined') {
+            console.log("sendNotification called"); // Log: Function called
+            console.log("Navigator userAgent:", navigator.userAgent); // Log: User agent
+
             if (typeof navigator !== 'undefined' && navigator.userAgent.includes('Mobile')) {
+                console.log("Mobile device detected, attempting Service Worker notification"); // Log: Mobile check
+
                 // Mobile: Use Service Worker
                 if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    console.log("Service Worker is active, sending message"); // Log: SW active
                     navigator.serviceWorker.controller.postMessage({
                         type: 'PRICE_ALERT',
                         payload: {
@@ -346,14 +352,33 @@ export default function Home() {
                             price,
                         },
                     });
+                    console.log("Message posted to Service Worker"); // Log: Message posted
+                } else {
+                    console.log("Service Worker not available, attempting registration"); // Log: SW not available
+                    navigator.serviceWorker.register('/service-worker.js')
+                        .then(registration => {
+                            console.log('Service worker registered successfully:', registration);
+                            registration.showNotification('Price Alert!', {
+                                body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
+                                icon: '/favicon.ico',
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Service worker registration failed:', error);
+                        });
                 }
             } else {
+                console.log("Desktop device detected, attempting Browser Notification API"); // Log: Desktop check
                 // Web: Use Browser Notifications API
                 if (Notification.permission === 'granted') {
+                    console.log("Notification permission is granted, sending notification"); // Log: Perm granted
                     new Notification('Price Alert!', {
                         body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
                         icon: '/favicon.ico',
                     });
+                    console.log("Browser notification sent"); // Log: Notification sent
+                } else {
+                    console.log("Notification permission not granted"); // Log: Perm not granted
                 }
             }
         }
