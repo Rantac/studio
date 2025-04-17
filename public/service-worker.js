@@ -1,4 +1,4 @@
->// service-worker.js
+// service-worker.js
 self.addEventListener('install', event => {
     console.log('Service Worker installed');
     // Perform any installation steps such as caching static assets
