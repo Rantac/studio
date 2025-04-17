@@ -53,7 +53,6 @@ export default function Home() {
         XRP: number | null;
         XLM: number | null;
         LINK: number | null;
-        CAKE: number | null;
     }>({
         BTC: null,
         ETH: null,
@@ -64,7 +63,6 @@ export default function Home() {
         XRP: null,
         XLM: null,
         LINK: null,
-        CAKE: null,
     });
 
     const [waitingPrices, setWaitingPrices] = useState<{
@@ -77,7 +75,6 @@ export default function Home() {
         XRP: string | null;
         XLM: string | null;
         LINK: string | null;
-        CAKE: string | null;
     }>({
         BTC: null,
         ETH: null,
@@ -88,7 +85,6 @@ export default function Home() {
         XRP: null,
         XLM: null,
         LINK: null,
-        CAKE: null,
     });
 
     const getStatus = (coin: string) => {
@@ -312,7 +308,6 @@ export default function Home() {
                 const xrp = result.data.coins.find((coin: any) => coin.symbol === 'XRP');
                 const xlm = result.data.coins.find((coin: any) => coin.symbol === 'XLM');
                 const link = result.data.coins.find((coin: any) => coin.symbol === 'LINK');
-                const cake = result.data.coins.find((coin: any) => coin.symbol === 'CAKE');
 
                 if (btc) {
                     setCoinPrices(prev => ({...prev, BTC: parseFloat(btc.price)}));
@@ -367,12 +362,6 @@ export default function Home() {
                 } else {
                     setError('Chainlink price not found');
                     console.error('Chainlink price not found');
-                }
-                if (cake) {
-                    setCoinPrices(prev => ({...prev, CAKE: parseFloat(cake.price)}));
-                } else {
-                    setError('PancakeSwap price not found');
-                    console.error('PancakeSwap price not found');
                 }
             } catch (e: any) {
                 setError(e.message);
@@ -787,18 +776,6 @@ export default function Home() {
                                         <p>Status: {getStatus('LINK')}</p>
                                     )}
                                 </div>
-                                <div>
-                                    <p>CAKE: {coinPrices.CAKE !== null ? `$${coinPrices.CAKE.toFixed(2)}` : 'Loading...'}</p>
-                                    <Input
-                                        type="text"
-                                        placeholder="Waiting Price (e.g., 3-4)"
-                                        value={waitingPrices.CAKE || ''}
-                                        onChange={(e) => setWaitingPrices(prev => ({...prev, CAKE: e.target.value}))}
-                                    />
-                                    {waitingPrices.CAKE && coinPrices.CAKE && (
-                                        <p>Status: {getStatus('CAKE')}</p>
-                                    )}
-                                </div>
                             </div>
                         </TabsContent>
                     </Tabs>
@@ -807,3 +784,4 @@ export default function Home() {
         </main>
     );
 }
+
