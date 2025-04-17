@@ -245,7 +245,10 @@ export default function Home() {
                 };
                 const response = await fetch(url, options);
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorMessage = `HTTP error! status: ${response.status}`;
+                    setError(errorMessage);
+                    console.error("Market Price Fetch Error:", errorMessage); // Log error
+                    throw new Error(errorMessage);
                 }
                 const result = await response.json();
                 // Find Bitcoin's price
@@ -259,26 +262,31 @@ export default function Home() {
                     setCoinPrices(prev => ({...prev, BTC: parseFloat(btc.price)}));
                 } else {
                     setError('Bitcoin price not found');
+                    console.error('Bitcoin price not found');
                 }
                 if (eth) {
                     setCoinPrices(prev => ({...prev, ETH: parseFloat(eth.price)}));
                 } else {
                     setError('Ethereum price not found');
+                    console.error('Ethereum price not found');
                 }
                 if (bnb) {
                     setCoinPrices(prev => ({...prev, BNB: parseFloat(bnb.price)}));
                 } else {
                     setError('Binance Coin price not found');
+                    console.error('Binance Coin price not found');
                 }
                 if (sol) {
                     setCoinPrices(prev => ({...prev, SOL: parseFloat(sol.price)}));
                 } else {
                     setError('Solana price not found');
+                    console.error('Solana price not found');
                 }
                 if (ton) {
                     setCoinPrices(prev => ({...prev, TON: parseFloat(ton.price)}));
                 } else {
                     setError('Toncoin price not found');
+                    console.error('Toncoin price not found');
                 }
             } catch (e: any) {
                 setError(e.message);
@@ -296,21 +304,25 @@ export default function Home() {
 
     // Push Notification Functionality
     useEffect(() => {
-        // Request notification permission on component mount
-        if (typeof window !== 'undefined') {
-            const requestNotificationPermission = async () => {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    console.log('Notification permission granted.');
-                } else if (permission === 'denied') {
-                    console.log('Notification permission denied.');
-                } else {
-                    console.log('Notification permission pending...');
+        // Function to request notification permission
+        const requestNotificationPermission = async () => {
+            if (typeof window !== 'undefined') {
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        console.log('Notification permission granted.');
+                    } else if (permission === 'denied') {
+                        console.log('Notification permission denied.');
+                    } else {
+                        console.log('Notification permission pending...');
+                    }
+                } catch (error: any) {
+                    console.error("Error requesting notification permission:", error);
                 }
-            };
+            }
+        };
 
-            requestNotificationPermission();
-        }
+        requestNotificationPermission();
     }, []);
 
     useEffect(() => {
@@ -323,6 +335,8 @@ export default function Home() {
                         body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
                         icon: '/favicon.ico',
                     });
+                }).catch(error => {
+                    console.error("Service worker registration failed:", error);
                 });
             }
         };
@@ -361,7 +375,7 @@ export default function Home() {
                         <TabsList className="grid w-full grid-cols-4">
                             <TabsTrigger value="tasks">Epic Notes</TabsTrigger>
                             <TabsTrigger value="forex">Pips</TabsTrigger>
-                            <TabsTrigger value="crypto">CPS</TabsTrigger>
+                            <TabsTrigger value="crypto">Crypto</TabsTrigger>
                             <TabsTrigger value="market">Market</TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="space-y-4">
@@ -634,4 +648,5 @@ export default function Home() {
         </main>
     );
 }
+
 
