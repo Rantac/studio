@@ -1,4 +1,3 @@
-
 'use client';
 
 import {useState, useEffect, useRef} from 'react';
@@ -108,6 +107,8 @@ export default function Home() {
         if (storedWaitingPrices) {
             setWaitingPrices(JSON.parse(storedWaitingPrices));
         }
+
+        requestNotificationPermission();
     }, []);
 
     useEffect(() => {
@@ -294,6 +295,54 @@ export default function Home() {
 
         return () => clearInterval(intervalId); // Clean up interval on unmount
     }, []);
+
+    useEffect(() => {
+        const checkWaitingPrices = () => {
+            if (Notification.permission === 'granted') {
+                Object.keys(coinPrices).forEach((coin: string) => {
+                    const marketPrice = coinPrices[coin as keyof typeof coinPrices];
+                    const waitingPrice = waitingPrices[coin as keyof typeof waitingPrices];
+
+                    if (marketPrice && waitingPrice) {
+                        const [lowStr, highStr] = waitingPrice.split('-').map(s => s.trim());
+                        const low = parseFloat(lowStr);
+                        const high = parseFloat(highStr);
+
+                        if (!isNaN(low) && !isNaN(high) && marketPrice >= low && marketPrice <= high) {
+                            sendNotification(coin, marketPrice);
+                        }
+                    }
+                });
+            }
+        };
+
+        checkWaitingPrices();
+    }, [coinPrices, waitingPrices]);
+
+    const requestNotificationPermission = async () => {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            if (Notification.permission === 'default') {
+                try {
+                    const permission = await Notification.requestPermission();
+                    console.log(`Notification permission ${permission}.`);
+                } catch (error) {
+                    console.error("Error requesting notification permission:", error);
+                }
+            } else if (Notification.permission === 'granted') {
+                console.log("Notification permission granted.");
+            }
+        }
+    };
+
+    const sendNotification = (coin: string, price: number) => {
+        if (typeof window !== 'undefined' && Notification.permission === 'granted') {
+            new Notification('Price Alert!', {
+                body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
+                icon: '/favicon.ico',
+            });
+        }
+    };
+
 
     return (
         <main className="flex flex-col items-center justify-start min-h-screen bg-secondary p-4 md:p-10">
@@ -579,4 +628,3 @@ export default function Home() {
         </main>
     );
 }
-
