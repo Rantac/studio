@@ -333,7 +333,7 @@ export default function Home() {
             }
 
              // Register service worker for mobile devices
-             if ('serviceWorker' in navigator) {
+             if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
                 try {
                     // Ensure the service worker file is in the public directory
                     const registration = await navigator.serviceWorker.register('/service-worker.js');
@@ -366,17 +366,19 @@ export default function Home() {
                     console.log("Message posted to Service Worker"); // Log: Message posted
                 } else {
                     console.log("Service Worker not available, attempting registration"); // Log: SW not available
-                    navigator.serviceWorker.register('/service-worker.js')
-                        .then(registration => {
-                            console.log('Service worker registered successfully:', registration);
-                            registration.showNotification('Price Alert!', {
-                                body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-                                icon: '/favicon.ico',
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.register('/service-worker.js')
+                            .then(registration => {
+                                console.log('Service worker registered successfully:', registration);
+                                registration.showNotification('Price Alert!', {
+                                    body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
+                                    icon: '/favicon.ico',
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Service worker registration failed:', error);
                             });
-                        })
-                        .catch(error => {
-                            console.error('Service worker registration failed:', error);
-                        });
+                    }
                 }
             } else {
                 console.log("Desktop device detected, attempting Browser Notification API"); // Log: Desktop check
@@ -680,3 +682,4 @@ export default function Home() {
         </main>
     );
 }
+
