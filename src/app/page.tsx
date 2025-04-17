@@ -94,6 +94,10 @@ export default function Home() {
         }
     };
 
+    const isMobile = () => {
+        if (typeof window === 'undefined') return false;
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    };
 
     useEffect(() => {
         // Load tasks from local storage on component mount
@@ -339,15 +343,37 @@ export default function Home() {
             console.log("sendNotification called"); // Log: Function called
             console.log("Navigator userAgent:", navigator.userAgent); // Log: User agent
 
-            if (Notification.permission === 'granted') {
-                console.log("Notification permission is granted, sending notification"); // Log: Perm granted
-                new Notification('Price Alert!', {
-                    body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-                    icon: '/favicon.ico',
-                });
-                console.log("Browser notification sent"); // Log: Notification sent
+            const notificationTitle = 'Price Alert!';
+            const notificationOptions = {
+                body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
+                icon: '/favicon.ico',
+            };
+
+            if (isMobile()) {
+                // Mobile: Use Service Worker
+                if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        if (registration.showNotification) {
+                            registration.showNotification(notificationTitle, notificationOptions)
+                                .then(() => console.log('Browser notification sent (Service Worker)'))
+                                .catch(err => console.error('Service Worker notification error:', err));
+                        } else {
+                            console.warn('showNotification not supported in this Service Worker.');
+                        }
+                    }).catch(error => {
+                        console.error("Service Worker ready failed:", error);
+                    });
+                } else {
+                    console.warn('Service Worker not available.');
+                }
             } else {
-                console.log("Notification permission not granted"); // Log: Perm not granted
+                // Desktop: Use regular Notification API
+                if (Notification.permission === 'granted') {
+                    new Notification(notificationTitle, notificationOptions);
+                    console.log("Browser notification sent (Notification API)"); // Log: Notification sent
+                } else {
+                    console.log("Notification permission not granted"); // Log: Perm not granted
+                }
             }
         }
     };
