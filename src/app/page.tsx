@@ -336,7 +336,7 @@ export default function Home() {
              if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
                 try {
                     // Ensure the service worker file is in the public directory
-                    const registration = await navigator.serviceWorker.register('/service-worker.js');
+                    const registration = await navigator.serviceWorker.register('/service-worker.js', { type: 'module' });
                     console.log('Service worker registered successfully:', registration);
                 } catch (error) {
                     console.error('Service worker registration failed:', error);
@@ -367,7 +367,7 @@ export default function Home() {
                 } else {
                     console.log("Service Worker not available, attempting registration"); // Log: SW not available
                     if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.register('/service-worker.js')
+                        navigator.serviceWorker.register('/service-worker.js', { type: 'module' })
                             .then(registration => {
                                 console.log('Service worker registered successfully:', registration);
                                 registration.showNotification('Price Alert!', {
@@ -682,4 +682,3 @@ export default function Home() {
         </main>
     );
 }
-
