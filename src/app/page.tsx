@@ -113,6 +113,16 @@ export default function Home() {
         }
 
         requestNotificationPermission();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('Service Worker registration failed:', error);
+                });
+        }
     }, []);
 
     useEffect(() => {
@@ -302,22 +312,20 @@ export default function Home() {
 
     useEffect(() => {
         const checkWaitingPrices = () => {
-            if (Notification.permission === 'granted') {
-                Object.keys(coinPrices).forEach((coin: string) => {
-                    const marketPrice = coinPrices[coin as keyof typeof coinPrices];
-                    const waitingPrice = waitingPrices[coin as keyof typeof waitingPrices];
+            Object.keys(coinPrices).forEach((coin: string) => {
+                const marketPrice = coinPrices[coin as keyof typeof coinPrices];
+                const waitingPrice = waitingPrices[coin as keyof typeof waitingPrices];
 
-                    if (marketPrice && waitingPrice) {
-                        const [lowStr, highStr] = waitingPrice.split('-').map(s => s.trim());
-                        const low = parseFloat(lowStr);
-                        const high = parseFloat(highStr);
+                if (marketPrice && waitingPrice) {
+                    const [lowStr, highStr] = waitingPrice.split('-').map(s => s.trim());
+                    const low = parseFloat(lowStr);
+                    const high = parseFloat(highStr);
 
-                        if (!isNaN(low) && !isNaN(high) && marketPrice >= low && marketPrice <= high) {
-                            sendNotification(coin, marketPrice);
-                        }
+                    if (!isNaN(low) && !isNaN(high) && marketPrice >= low && marketPrice <= high) {
+                        sendNotification(coin, marketPrice);
                     }
-                });
-            }
+                }
+            });
         };
 
         checkWaitingPrices();
@@ -351,8 +359,10 @@ export default function Home() {
 
             if (isMobile()) {
                 // Mobile: Use Service Worker
+                console.log("Sending notification via Service Worker");
                 if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
                     navigator.serviceWorker.ready.then(registration => {
+                        console.log("Service Worker Registration is ready: ", registration);
                         if (registration.showNotification) {
                             registration.showNotification(notificationTitle, notificationOptions)
                                 .then(() => console.log('Browser notification sent (Service Worker)'))
@@ -368,12 +378,9 @@ export default function Home() {
                 }
             } else {
                 // Desktop: Use regular Notification API
-                if (Notification.permission === 'granted') {
-                    new Notification(notificationTitle, notificationOptions);
-                    console.log("Browser notification sent (Notification API)"); // Log: Notification sent
-                } else {
-                    console.log("Notification permission not granted"); // Log: Perm not granted
-                }
+                console.log("Sending notification via regular Notification API");
+                new Notification(notificationTitle, notificationOptions);
+                console.log("Browser notification sent (Notification API)"); // Log: Notification sent
             }
         }
     };
