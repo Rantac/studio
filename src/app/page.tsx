@@ -294,62 +294,6 @@ export default function Home() {
         return () => clearInterval(intervalId); // Clean up interval on unmount
     }, []);
 
-    // Push Notification Functionality
-    useEffect(() => {
-        // Request notification permission on component mount
-        if (typeof window !== 'undefined') {
-            const requestNotificationPermission = async () => {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    console.log('Notification permission granted.');
-                } else if (permission === 'denied') {
-                    console.log('Notification permission denied.');
-                } else {
-                    console.log('Notification permission pending...');
-                }
-            };
-
-            requestNotificationPermission();
-        }
-    }, []);
-
-    useEffect(() => {
-        // Function to send notification
-        const sendNotification = (coin: string, price: number) => {
-            if (typeof window !== 'undefined' && Notification.permission === 'granted') {
-                // Use ServiceWorkerRegistration.showNotification() for push notifications
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.showNotification('Price Alert!', {
-                        body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-                        icon: '/favicon.ico',
-                    });
-                });
-            }
-        };
-
-        // Check if the market prices are within the waiting price range
-        const checkWaitingPrices = () => {
-            for (const coin of ['BTC', 'ETH', 'BNB', 'SOL', 'TON']) {
-                const marketPrice = coinPrices[coin as keyof typeof coinPrices];
-                const waitingPrice = waitingPrices[coin as keyof typeof waitingPrices];
-
-                if (marketPrice && waitingPrice) {
-                    const [lowStr, highStr] = waitingPrice.split('-').map(s => s.trim());
-                    const low = parseFloat(lowStr);
-                    const high = parseFloat(highStr);
-
-                    if (!isNaN(low) && !isNaN(high) && marketPrice >= low && marketPrice <= high) {
-                        sendNotification(coin, marketPrice);
-                    }
-                }
-            }
-        };
-
-        // Call the function to check waiting prices
-        checkWaitingPrices();
-    }, [coinPrices, waitingPrices]);
-
-
     return (
         <main className="flex flex-col items-center justify-start min-h-screen bg-secondary p-4 md:p-10">
             <Card className="w-full max-w-md space-y-4 bg-white shadow-md rounded-lg">
@@ -357,14 +301,14 @@ export default function Home() {
                     <CardTitle className="text-xl font-semibold">TaskFlow</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <Tabs defaultValue="tasks" className="w-full">
+                    <Tabs defaultValue="Epic Notes" className="w-full">
                         <TabsList className="grid w-full grid-cols-4">
-                            <TabsTrigger value="tasks">Epic Notes</TabsTrigger>
-                            <TabsTrigger value="forex">Pips</TabsTrigger>
-                            <TabsTrigger value="crypto">CPS</TabsTrigger>
-                            <TabsTrigger value="market">Market</TabsTrigger>
+                            <TabsTrigger value="Epic Notes">Epic Notes</TabsTrigger>
+                            <TabsTrigger value="Pips">Pips</TabsTrigger>
+                            <TabsTrigger value="Crypto">Crypto</TabsTrigger>
+                            <TabsTrigger value="Market">Market</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="tasks" className="space-y-4">
+                        <TabsContent value="Epic Notes" className="space-y-4">
                             <div className="divide-y divide-gray-200">
                                 {tasks.map((task) => (
                                     <div
@@ -415,7 +359,7 @@ export default function Home() {
                                 />
                             </div>
                         </TabsContent>
-                        <TabsContent value="forex" className="space-y-4">
+                        <TabsContent value="Pips" className="space-y-4">
                             <div className="grid gap-4">
                                 <div className="space-y-2">
                                     <div className="mb-4 grid grid-cols-1 gap-2">
@@ -485,7 +429,7 @@ export default function Home() {
                                 )}
                             </div>
                         </TabsContent>
-                        <TabsContent value="crypto" className="space-y-4">
+                        <TabsContent value="Crypto" className="space-y-4">
                             <div className="grid gap-4">
                                 <div className="space-y-2">
                                     <div className="mb-4 grid grid-cols-1 gap-2">
@@ -562,7 +506,7 @@ export default function Home() {
                                 )}
                             </div>
                         </TabsContent>
-                        <TabsContent value="market" className="space-y-4">
+                        <TabsContent value="Market" className="space-y-4">
                             {loading && <p>Loading market data...</p>}
                             {error && <p className="text-red-500">Error: {error}</p>}
                             <div className="grid gap-4">
@@ -634,4 +578,3 @@ export default function Home() {
         </main>
     );
 }
-
