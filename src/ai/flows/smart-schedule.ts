@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A smart scheduling AI agent that suggests when tasks should be scheduled based on task description and the current day of the week.
@@ -74,3 +75,4 @@ const suggestScheduleFlow = ai.defineFlow<
   });
   return output!;
 });
+

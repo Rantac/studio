@@ -1,3 +1,4 @@
+
 /**
  * Represents the current day of the week.
  */
@@ -20,3 +21,4 @@ export async function getDayOfWeek(): Promise<DayOfWeek> {
     day: 'Monday',
   };
 }
+
