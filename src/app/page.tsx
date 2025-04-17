@@ -49,12 +49,22 @@ export default function Home() {
         BNB: number | null;
         SOL: number | null;
         TON: number | null;
+        LTC: number | null;
+        XRP: number | null;
+        XLM: number | null;
+        LINK: number | null;
+        CAKE: number | null;
     }>({
         BTC: null,
         ETH: null,
         BNB: null,
         SOL: null,
         TON: null,
+        LTC: null,
+        XRP: null,
+        XLM: null,
+        LINK: null,
+        CAKE: null,
     });
 
     const [waitingPrices, setWaitingPrices] = useState<{
@@ -63,12 +73,22 @@ export default function Home() {
         BNB: string | null;
         SOL: string | null;
         TON: string | null;
+        LTC: string | null;
+        XRP: string | null;
+        XLM: string | null;
+        LINK: string | null;
+        CAKE: string | null;
     }>({
         BTC: null,
         ETH: null,
         BNB: null,
         SOL: null,
         TON: null,
+        LTC: null,
+        XRP: null,
+        XLM: null,
+        LINK: null,
+        CAKE: null,
     });
 
     const getStatus = (coin: string) => {
@@ -288,6 +308,11 @@ export default function Home() {
                 const bnb = result.data.coins.find((coin: any) => coin.symbol === 'BNB');
                 const sol = result.data.coins.find((coin: any) => coin.symbol === 'SOL');
                 const ton = result.data.coins.find((coin: any) => coin.symbol === 'TON');
+                const ltc = result.data.coins.find((coin: any) => coin.symbol === 'LTC');
+                const xrp = result.data.coins.find((coin: any) => coin.symbol === 'XRP');
+                const xlm = result.data.coins.find((coin: any) => coin.symbol === 'XLM');
+                const link = result.data.coins.find((coin: any) => coin.symbol === 'LINK');
+                const cake = result.data.coins.find((coin: any) => coin.symbol === 'CAKE');
 
                 if (btc) {
                     setCoinPrices(prev => ({...prev, BTC: parseFloat(btc.price)}));
@@ -318,6 +343,36 @@ export default function Home() {
                 } else {
                     setError('Toncoin price not found');
                     console.error('Toncoin price not found');
+                }
+                if (ltc) {
+                    setCoinPrices(prev => ({...prev, LTC: parseFloat(ltc.price)}));
+                } else {
+                    setError('Litecoin price not found');
+                    console.error('Litecoin price not found');
+                }
+                if (xrp) {
+                    setCoinPrices(prev => ({...prev, XRP: parseFloat(xrp.price)}));
+                } else {
+                    setError('Ripple price not found');
+                    console.error('Ripple price not found');
+                }
+                if (xlm) {
+                    setCoinPrices(prev => ({...prev, XLM: parseFloat(xlm.price)}));
+                } else {
+                    setError('Stellar price not found');
+                    console.error('Stellar price not found');
+                }
+                if (link) {
+                    setCoinPrices(prev => ({...prev, LINK: parseFloat(link.price)}));
+                } else {
+                    setError('Chainlink price not found');
+                    console.error('Chainlink price not found');
+                }
+                if (cake) {
+                    setCoinPrices(prev => ({...prev, CAKE: parseFloat(cake.price)}));
+                } else {
+                    setError('PancakeSwap price not found');
+                    console.error('PancakeSwap price not found');
                 }
             } catch (e: any) {
                 setError(e.message);
@@ -684,6 +739,66 @@ export default function Home() {
                                         <p>Status: {getStatus('TON')}</p>
                                     )}
                                 </div>
+                                <div>
+                                    <p>LTC: {coinPrices.LTC !== null ? `$${coinPrices.LTC.toFixed(2)}` : 'Loading...'}</p>
+                                    <Input
+                                        type="text"
+                                        placeholder="Waiting Price (e.g., 50-60)"
+                                        value={waitingPrices.LTC || ''}
+                                        onChange={(e) => setWaitingPrices(prev => ({...prev, LTC: e.target.value}))}
+                                    />
+                                    {waitingPrices.LTC && coinPrices.LTC && (
+                                        <p>Status: {getStatus('LTC')}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <p>XRP: {coinPrices.XRP !== null ? `$${coinPrices.XRP.toFixed(2)}` : 'Loading...'}</p>
+                                    <Input
+                                        type="text"
+                                        placeholder="Waiting Price (e.g., 0.5-0.6)"
+                                        value={waitingPrices.XRP || ''}
+                                        onChange={(e) => setWaitingPrices(prev => ({...prev, XRP: e.target.value}))}
+                                    />
+                                    {waitingPrices.XRP && coinPrices.XRP && (
+                                        <p>Status: {getStatus('XRP')}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <p>XLM: {coinPrices.XLM !== null ? `$${coinPrices.XLM.toFixed(2)}` : 'Loading...'}</p>
+                                    <Input
+                                        type="text"
+                                        placeholder="Waiting Price (e.g., 0.1-0.15)"
+                                        value={waitingPrices.XLM || ''}
+                                        onChange={(e) => setWaitingPrices(prev => ({...prev, XLM: e.target.value}))}
+                                    />
+                                    {waitingPrices.XLM && coinPrices.XLM && (
+                                        <p>Status: {getStatus('XLM')}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <p>LINK: {coinPrices.LINK !== null ? `$${coinPrices.LINK.toFixed(2)}` : 'Loading...'}</p>
+                                    <Input
+                                        type="text"
+                                        placeholder="Waiting Price (e.g., 15-20)"
+                                        value={waitingPrices.LINK || ''}
+                                        onChange={(e) => setWaitingPrices(prev => ({...prev, LINK: e.target.value}))}
+                                    />
+                                    {waitingPrices.LINK && coinPrices.LINK && (
+                                        <p>Status: {getStatus('LINK')}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <p>CAKE: {coinPrices.CAKE !== null ? `$${coinPrices.CAKE.toFixed(2)}` : 'Loading...'}</p>
+                                    <Input
+                                        type="text"
+                                        placeholder="Waiting Price (e.g., 3-4)"
+                                        value={waitingPrices.CAKE || ''}
+                                        onChange={(e) => setWaitingPrices(prev => ({...prev, CAKE: e.target.value}))}
+                                    />
+                                    {waitingPrices.CAKE && coinPrices.CAKE && (
+                                        <p>Status: {getStatus('CAKE')}</p>
+                                    )}
+                                </div>
                             </div>
                         </TabsContent>
                     </Tabs>
@@ -692,4 +807,3 @@ export default function Home() {
         </main>
     );
 }
-
