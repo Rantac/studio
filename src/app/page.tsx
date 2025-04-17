@@ -8,6 +8,8 @@ import {cn} from '@/lib/utils';
 import {useToast} from '@/hooks/use-toast';
 import {Input} from '@/components/ui/input';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 
 interface Task {
     id: string;
@@ -126,33 +128,6 @@ export default function Home() {
         const storedWaitingPrices = localStorage.getItem('waitingPrices');
         if (storedWaitingPrices) {
             setWaitingPrices(JSON.parse(storedWaitingPrices));
-        }
-
-        const requestNotificationPermission = async () => {
-            if (typeof window !== 'undefined') {
-                if (Notification.permission === 'default') {
-                    try {
-                        const permission = await Notification.requestPermission();
-                        console.log(`Notification permission ${permission}.`);
-                    } catch (error) {
-                        console.error("Error requesting notification permission:", error);
-                    }
-                } else if (Notification.permission === 'granted') {
-                    console.log("Notification permission granted.");
-                }
-            }
-        };
-
-        requestNotificationPermission();
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => {
-                    console.log('Service Worker registered with scope:', registration.scope);
-                })
-                .catch(error => {
-                    console.error('Service Worker registration failed:', error);
-                });
         }
     }, []);
 
@@ -372,7 +347,7 @@ export default function Home() {
         };
 
         fetchMarketData();
-        const intervalId = setInterval(fetchMarketData, 3600000); // Fetch every 1 hour
+        const intervalId = setInterval(fetchMarketData, 1200000); // Fetch every 20 minutes
 
         return () => clearInterval(intervalId); // Clean up interval on unmount
     }, []);
@@ -466,7 +441,7 @@ export default function Home() {
                             <TabsTrigger value="Crypto">Crypto</TabsTrigger>
                             <TabsTrigger value="Market">Market</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="Epic Notes" className="space-y-4">
+                        <TabsContent value="Epic Notes" className="space-y-4 p-4">
                             <div className="divide-y divide-gray-200">
                                 {tasks.map((task) => (
                                     <div
@@ -784,4 +759,5 @@ export default function Home() {
         </main>
     );
 }
+
 
