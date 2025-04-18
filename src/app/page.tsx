@@ -352,44 +352,43 @@ export default function Home() {
         return () => clearInterval(intervalId); // Clean up interval on unmount
     }, []);
 
-    useEffect(() => {
-        // Function to send notification
-        const sendNotification = (coin: string, price: number) => {
-            if (typeof window !== 'undefined' && Notification.permission === 'granted') {
-                const notificationTitle = 'Price Alert!';
-                const notificationOptions = {
-                    body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-                    icon: '/favicon.ico',
-                };
+    const sendNotification = (coin: string, price: number) => {
+        if (typeof window !== 'undefined') {
+            const notificationTitle = 'Price Alert!';
+            const notificationOptions = {
+                body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
+                icon: '/favicon.ico',
+            };
 
-                if (isMobile()) {
-                    // Mobile: Use Service Worker
-                    console.log("Sending notification via Service Worker");
-                    if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
-                        navigator.serviceWorker.ready.then(registration => {
-                            console.log("Service Worker Registration is ready: ", registration);
-                            if (registration.showNotification) {
-                                registration.showNotification(notificationTitle, notificationOptions)
-                                    .then(() => console.log('Browser notification sent (Service Worker)'))
-                                    .catch(err => console.error('Service Worker notification error:', err));
-                            } else {
-                                console.warn('showNotification not supported in this Service Worker.');
-                            }
-                        }).catch(error => {
-                            console.error("Service Worker ready failed:", error);
-                        });
-                    } else {
-                        console.warn('Service Worker not available.');
-                    }
+            if (isMobile()) {
+                // Mobile: Use Service Worker
+                console.log("Sending notification via Service Worker");
+                if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+                    navigator.serviceWorker.ready.then(registration => {
+                        console.log("Service Worker Registration is ready: ", registration);
+                        if (registration.showNotification) {
+                            registration.showNotification(notificationTitle, notificationOptions)
+                                .then(() => console.log('Browser notification sent (Service Worker)'))
+                                .catch(err => console.error('Service Worker notification error:', err));
+                        } else {
+                            console.warn('showNotification not supported in this Service Worker.');
+                        }
+                    }).catch(error => {
+                        console.error("Service Worker ready failed:", error);
+                    });
                 } else {
-                    // Desktop: Use regular Notification API
-                    console.log("Sending notification via regular Notification API");
-                    new Notification(notificationTitle, notificationOptions);
-                    console.log("Browser notification sent (Notification API)"); // Log: Notification sent
+                    console.warn('Service Worker not available.');
                 }
+            } else {
+                // Desktop: Use regular Notification API
+                console.log("Sending notification via regular Notification API");
+                new Notification(notificationTitle, notificationOptions);
+                console.log("Browser notification sent (Notification API)"); // Log: Notification sent
             }
-        };
+        }
+    };
 
+    useEffect(() => {
         // Check if the market prices are within the waiting price range
         const checkWaitingPrices = () => {
             Object.keys(coinPrices).forEach((coin: string) => {
@@ -408,7 +407,9 @@ export default function Home() {
             });
         };
 
-        checkWaitingPrices();
+        // Delay the check by a short time to ensure coinPrices are loaded
+        const timeoutId = setTimeout(checkWaitingPrices, 1000);
+        return () => clearTimeout(timeoutId);
     }, [coinPrices, waitingPrices]);
 
     useEffect(() => {
@@ -427,7 +428,9 @@ export default function Home() {
             }
         };
 
-        requestNotificationPermission();
+        // Delay the permission request until after the component has mounted
+        const timeoutId = setTimeout(requestNotificationPermission, 500);
+        return () => clearTimeout(timeoutId);
     }, []);
 
 
