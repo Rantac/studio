@@ -411,20 +411,24 @@ export default function Home() {
         checkWaitingPrices();
     }, [coinPrices, waitingPrices]);
 
-    const requestNotificationPermission = async () => {
-        if (typeof window !== 'undefined') {
-            if (Notification.permission === 'default') {
-                try {
-                    const permission = await Notification.requestPermission();
-                    console.log(`Notification permission ${permission}.`);
-                } catch (error) {
-                    console.error("Error requesting notification permission:", error);
+    useEffect(() => {
+        const requestNotificationPermission = async () => {
+            if (typeof window !== 'undefined') {
+                if (Notification.permission === 'default') {
+                    try {
+                        const permission = await Notification.requestPermission();
+                        console.log(`Notification permission ${permission}.`);
+                    } catch (error) {
+                        console.error("Error requesting notification permission:", error);
+                    }
+                } else if (Notification.permission === 'granted') {
+                    console.log("Notification permission granted.");
                 }
-            } else if (Notification.permission === 'granted') {
-                console.log("Notification permission granted.");
             }
-        }
-    };
+        };
+
+        requestNotificationPermission();
+    }, []);
 
 
     return (
@@ -759,4 +763,3 @@ export default function Home() {
         </main>
     );
 }
-
