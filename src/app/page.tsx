@@ -446,11 +446,11 @@ export default function Home() {
                 </CardHeader>
                 <CardContent className="p-0">
                     <Tabs defaultValue="Epic Notes" className="w-full">
-                        <TabsList className="grid w-full grid-cols-4 bg-card border-b border-border">
-                            <TabsTrigger value="Epic Notes" className="data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Epic Notes</TabsTrigger>
-                            <TabsTrigger value="Pips" className="data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Pips</TabsTrigger>
-                            <TabsTrigger value="Crypto" className="data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Crypto</TabsTrigger>
-                            <TabsTrigger value="Market" className="data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Market</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-4 bg-secondary border-b border-border">
+                            <TabsTrigger value="Epic Notes" className="data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Epic Notes</TabsTrigger>
+                            <TabsTrigger value="Pips" className="data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Pips</TabsTrigger>
+                            <TabsTrigger value="Crypto" className="data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Crypto</TabsTrigger>
+                            <TabsTrigger value="Market" className="data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Market</TabsTrigger>
                         </TabsList>
                         <TabsContent value="Epic Notes" className="space-y-6 p-6">
                             <div className="divide-y divide-border">
