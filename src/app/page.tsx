@@ -35,12 +35,11 @@ const fomcMeetingDates: FomcMeeting[] = [
 ];
 
 function getMonthIndex(monthName: string): number {
-  // Simplified mapping for month names to index (0-11)
   const monthMap: {[key: string]: number} = {
     'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
     'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
   };
-  return monthMap[monthName];
+  return monthMap[monthName.slice(0,3)]; // Use first 3 chars for robust matching
 }
 
 
@@ -204,7 +203,8 @@ export default function Home() {
     
       // Check meetings for the current year
       for (const meeting of fomcMeetingDates) {
-        const meetingEndDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.endDay, 23, 59, 59); // Consider end of day
+        // Ensure meeting.endDay is treated as the end of that day for comparison
+        const meetingEndDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.endDay, 23, 59, 59);
         if (meetingEndDate >= today) {
           upcomingMeetingData = { ...meeting, year: currentYear };
           break;
@@ -447,7 +447,7 @@ export default function Home() {
                     } else {
                         console.warn('Service Worker not available, not ready, or not controlling the page for mobile notification.');
                          try {
-                            new Notification(notificationTitle, notificationOptions); // This line might be problematic on mobile if not handled by SW
+                            new Notification(notificationTitle, notificationOptions); 
                             console.log('Fallback: Notification sent via Notification API on mobile.');
                         } catch (err) {
                             console.error('Fallback: Mobile Notification API error:', err);
@@ -720,4 +720,5 @@ export default function Home() {
         </main>
     );
 }
+
 
