@@ -5,9 +5,9 @@ import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Check, Circle, Trash} from 'lucide-react';
 import {cn} from '@/lib/utils';
-import {useToast} from '@/hooks/use-toast';
 import {Input} from '@/components/ui/input';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
+import { useToast } from "@/hooks/use-toast";
 
 
 interface Task {
@@ -440,9 +440,9 @@ export default function Home() {
 
     return (
         <main className="flex flex-col items-center justify-start min-h-screen bg-background p-4 md:p-10">
-            <Card className="w-full max-w-md space-y-4 bg-card text-card-foreground shadow-lg rounded-xl">
+            <Card className="w-full max-w-md space-y-4 bg-card text-card-foreground shadow-subtle rounded-xl">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 pt-6 px-6">
-                    <CardTitle className="text-2xl font-bold text-primary">TaskFlow</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-accent">PX</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                     <Tabs defaultValue="Epic Notes" className="w-full">
