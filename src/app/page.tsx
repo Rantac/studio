@@ -17,11 +17,40 @@ interface Task {
     completed: boolean;
 }
 
+interface FomcMeeting {
+  month: string;
+  startDay: number;
+  endDay: number;
+}
+
+const fomcMeetingDates: FomcMeeting[] = [
+  { month: 'Jan', startDay: 28, endDay: 29 },
+  { month: 'Mar', startDay: 18, endDay: 19 },
+  { month: 'May', startDay: 6, endDay: 7 },
+  { month: 'Jun', startDay: 17, endDay: 18 },
+  { month: 'Jul', startDay: 29, endDay: 30 },
+  { month: 'Sep', startDay: 16, endDay: 17 },
+  { month: 'Oct', startDay: 28, endDay: 29 },
+  { month: 'Dec', startDay: 9, endDay: 10 },
+];
+
+function getMonthIndex(monthName: string): number {
+  // Simplified mapping for month names to index (0-11)
+  const monthMap: {[key: string]: number} = {
+    'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+    'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+  };
+  return monthMap[monthName];
+}
+
+
 export default function Home() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [newTaskDescription, setNewTaskDescription] = useState('');
     const {toast} = useToast();
     const inputRef = useRef<HTMLInputElement>(null);
+    const [fomcDateString, setFomcDateString] = useState('');
+
 
     // Forex Calculator State
     const [stopLoss, setStopLoss] = useState('');
@@ -166,6 +195,34 @@ export default function Home() {
         // Save waiting prices to local storage whenever the waitingPrices state changes
         localStorage.setItem('waitingPrices', JSON.stringify(waitingPrices));
     }, [tasks, waitingPrices]);
+
+    useEffect(() => {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+    
+      let upcomingMeetingData: { month: string; startDay: number; endDay: number; year: number } | null = null;
+    
+      // Check meetings for the current year
+      for (const meeting of fomcMeetingDates) {
+        const meetingEndDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.endDay, 23, 59, 59); // Consider end of day
+        if (meetingEndDate >= today) {
+          upcomingMeetingData = { ...meeting, year: currentYear };
+          break;
+        }
+      }
+    
+      // If no upcoming meeting in the current year, check next year (using the first meeting in the list)
+      if (!upcomingMeetingData && fomcMeetingDates.length > 0) {
+        upcomingMeetingData = { ...fomcMeetingDates[0], year: currentYear + 1 };
+      }
+    
+      if (upcomingMeetingData) {
+        setFomcDateString(`FOMC: ${upcomingMeetingData.month} ${upcomingMeetingData.startDay}-${upcomingMeetingData.endDay}`);
+      } else {
+        setFomcDateString('FOMC: TBD');
+      }
+    }, []);
+
 
     const handleAddTask = async () => {
         if (newTaskDescription.trim() !== '') {
@@ -390,7 +447,7 @@ export default function Home() {
                     } else {
                         console.warn('Service Worker not available, not ready, or not controlling the page for mobile notification.');
                          try {
-                            new Notification(notificationTitle, notificationOptions);
+                            new Notification(notificationTitle, notificationOptions); // This line might be problematic on mobile if not handled by SW
                             console.log('Fallback: Notification sent via Notification API on mobile.');
                         } catch (err) {
                             console.error('Fallback: Mobile Notification API error:', err);
@@ -450,6 +507,9 @@ export default function Home() {
             <Card className="w-full max-w-md space-y-4 bg-card text-card-foreground shadow-subtle rounded-xl">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 pt-6 px-6">
                     <CardTitle className="text-2xl font-bold text-accent">PX</CardTitle>
+                     {fomcDateString && (
+                        <span className="text-sm text-muted-foreground whitespace-nowrap">{fomcDateString}</span>
+                    )}
                 </CardHeader>
                 <CardContent className="p-0">
                     <Tabs defaultValue="Epic Notes" className="w-full">
