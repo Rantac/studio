@@ -638,7 +638,7 @@ export default function Home() {
                             <div className="grid grid-cols-1 gap-y-5">
                                 {Object.keys(coinPrices).map((coinSymbol) => (
                                     <div key={coinSymbol} className="space-y-2"> {/* Reduced space-y from 3 to 2 */}
-                                        <p className="text-lg font-semibold text-foreground">{coinSymbol}: <span className="text-accent">{coinPrices[coinSymbol as keyof typeof coinPrices] !== null ? `$${coinPrices[coinSymbol as keyof typeof coinPrices]!.toFixed(2)}` : 'Loading...'}</span></p>
+                                        <p className="text-lg text-foreground">{coinSymbol}: <span className="text-accent">{coinPrices[coinSymbol as keyof typeof coinPrices] !== null ? `$${coinPrices[coinSymbol as keyof typeof coinPrices]!.toFixed(2)}` : 'Loading...'}</span></p>
                                         
                                         <Input
                                             type="text"
@@ -663,3 +663,4 @@ export default function Home() {
         </main>
     );
 }
+
