@@ -26,7 +26,7 @@ body {
     --muted: 0 0% 82.7%; /* #D3D3D3 Light Gray */
     --muted-foreground: 210 9% 50%; /* #7F8C8D Medium Gray */
 
-    --accent: 180 100% 25.1%; /* #008080 Teal */
+    --accent: 0 0% 0%; /* Black */
     --accent-foreground: 0 0% 98%; /* Almost White for text on accent */
 
     --destructive: 0 84.2% 60.2%; /* Standard destructive red */
@@ -34,26 +34,26 @@ body {
 
     --border: 0 0% 82.7%; /* #D3D3D3 Light Gray for borders */
     --input: 0 0% 100%; /* #FFFFFF White for inputs */
-    --ring: 180 100% 25.1%; /* #008080 Teal for focus rings */
+    --ring: 0 0% 0%; /* Black for focus rings */
 
     --radius: 0.75rem; /* 12px for rounded corners, applied via rounded-lg, rounded-xl etc. */
     
     /* Chart colors based on new theme */
-    --chart-1: 180 100% 30%; /* Teal variant */
+    --chart-1: 0 0% 10%;   /* Dark Gray, derived from Black */
     --chart-2: 200 53% 70%; /* Light Blue variant */
     --chart-3: 0 0% 65%;   /* Medium Gray variant */
-    --chart-4: 180 100% 35%;  /* Teal variant */
+    --chart-4: 0 0% 15%;  /* Dark Gray, derived from Black */
     --chart-5: 200 53% 75%; /* Light Blue variant */
 
     /* Sidebar colors (if used) */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 210 17% 20.4%;
-    --sidebar-primary: 180 100% 25.1%; /* Teal */
+    --sidebar-primary: 0 0% 0%; /* Black */
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 200 53.3% 85%; /* Lighter blue */
     --sidebar-accent-foreground: 210 17% 15%;
     --sidebar-border: 0 0% 82.7%;
-    --sidebar-ring: 180 100% 25.1%;
+    --sidebar-ring: 0 0% 0%; /* Black */
   }
 
   .dark {
@@ -75,32 +75,32 @@ body {
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 60%; /* Medium Gray for muted text */
 
-    --accent: 180 100% 35.1%; /* Brighter Teal for dark mode */
-    --accent-foreground: 0 0% 98%;
+    --accent: 0 0% 85%; /* Light Gray (was Brighter Teal, now "Dark Mode Black" accent) */
+    --accent-foreground: 0 0% 10%; /* Dark Gray/Black text for Light Gray accent button */
 
     --destructive: 0 70% 50.2%; 
     --destructive-foreground: 0 0% 98%;
 
     --border: 0 0% 25%; /* Darker border */
     --input: 0 0% 18%; /* Dark input background */
-    --ring: 180 100% 35.1%; /* Brighter Teal for focus rings */
+    --ring: 0 0% 85%; /* Light Gray for focus rings in dark mode */
     
     /* Chart colors for dark theme */
-    --chart-1: 180 100% 40%;
+    --chart-1: 0 0% 75%; /* Lighter Gray, from "Dark Mode Black" accent */
     --chart-2: 200 53% 65%;
     --chart-3: 0 0% 50%;
-    --chart-4: 180 100% 45%;
+    --chart-4: 0 0% 70%; /* Lighter Gray, from "Dark Mode Black" accent */
     --chart-5: 200 53% 70%;
 
     /* Sidebar colors for dark theme */
     --sidebar-background: 210 17% 10%;
     --sidebar-foreground: 0 0% 96.9%;
-    --sidebar-primary: 180 100% 35.1%;
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary: 0 0% 85%; /* Light Gray */
+    --sidebar-primary-foreground: 0 0% 10%; /* Dark Gray/Black */
     --sidebar-accent: 200 53.3% 55%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 25%;
-    --sidebar-ring: 180 100% 35.1%;
+    --sidebar-ring: 0 0% 85%; /* Light Gray */
   }
 }
 
