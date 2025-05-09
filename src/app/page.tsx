@@ -378,7 +378,7 @@ export default function Home() {
                 console.log("Notification permission granted.");
                 if (isMobile()) {
                     console.log("Mobile device detected. Using Service Worker for notification.");
-                    if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+                    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) { // Check if service worker is active
                         navigator.serviceWorker.ready.then(registration => {
                             console.log("Service Worker is ready. Attempting to show notification.");
                             registration.showNotification(notificationTitle, notificationOptions)
@@ -388,7 +388,14 @@ export default function Home() {
                             console.error("Service Worker ready error:", error);
                         });
                     } else {
-                        console.warn('Service Worker not available or not ready for mobile notification.');
+                        console.warn('Service Worker not available, not ready, or not controlling the page for mobile notification.');
+                        // Fallback for mobile if SW isn't controlling, though direct Notification API might be blocked.
+                         try {
+                            new Notification(notificationTitle, notificationOptions);
+                            console.log('Fallback: Notification sent via Notification API on mobile.');
+                        } catch (err) {
+                            console.error('Fallback: Mobile Notification API error:', err);
+                        }
                     }
                 } else {
                     console.log("Desktop device detected. Using Notification API.");
@@ -633,21 +640,20 @@ export default function Home() {
                                 {Object.keys(coinPrices).map((coinSymbol) => (
                                     <div key={coinSymbol} className="space-y-3">
                                         <p className="text-lg font-semibold text-foreground">{coinSymbol}: <span className="text-accent">{coinPrices[coinSymbol as keyof typeof coinPrices] !== null ? `$${coinPrices[coinSymbol as keyof typeof coinPrices]!.toFixed(2)}` : 'Loading...'}</span></p>
-                                        <div className="p-4 rounded-xl shadow-subtle border border-border bg-card">
-                                            <Input
-                                                type="text"
-                                                placeholder="Waiting Price (e.g., 20000-21000)"
-                                                className="mt-2 bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
-                                                value={waitingPrices[coinSymbol as keyof typeof waitingPrices] || ''}
-                                                onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
-                                            />
-                                            {waitingPrices[coinSymbol as keyof typeof waitingPrices] && coinPrices[coinSymbol as keyof typeof coinPrices] && (
-                                                <p className="mt-2 text-sm text-foreground">Status: <span className={cn(
-                                                    getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
-                                                    getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
-                                                )}>{getStatus(coinSymbol)}</span></p>
-                                            )}
-                                        </div>
+                                        
+                                        <Input
+                                            type="text"
+                                            placeholder="Waiting Price (e.g., 20000-21000)"
+                                            className="bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
+                                            value={waitingPrices[coinSymbol as keyof typeof waitingPrices] || ''}
+                                            onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
+                                        />
+                                        {waitingPrices[coinSymbol as keyof typeof waitingPrices] && coinPrices[coinSymbol as keyof typeof coinPrices] && (
+                                            <p className="mt-2 text-sm text-foreground">Status: <span className={cn(
+                                                getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
+                                                getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
+                                            )}>{getStatus(coinSymbol)}</span></p>
+                                        )}
                                     </div>
                                 ))}
                             </div>
