@@ -1,3 +1,4 @@
+
 'use client';
 
 import {useState, useEffect, useRef} from 'react';
@@ -551,7 +552,7 @@ export default function Home() {
                                     </select>
                                 </div>
                                 {pipsOfRisk !== null && pipsOfReward !== null && riskRewardRatio !== null && (
-                                    <div className="space-y-2 mt-4 p-4 bg-secondary rounded-xl shadow">
+                                    <div className="space-y-2 mt-4 p-4 bg-secondary rounded-xl shadow-subtle">
                                         <p className="text-lg font-semibold text-accent">Result:</p>
                                         <p className="text-foreground">Pips of Risk: <span className="font-medium text-accent">{pipsOfRisk.toFixed(2)}</span></p>
                                         <p className="text-foreground">Pips of Reward: <span className="font-medium text-accent">{pipsOfReward.toFixed(2)}</span></p>
@@ -613,7 +614,7 @@ export default function Home() {
                                     />
                                 </div>
                                 {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
-                                    <div className="space-y-2 mt-4 p-4 bg-secondary rounded-xl shadow">
+                                    <div className="space-y-2 mt-4 p-4 bg-secondary rounded-xl shadow-subtle">
                                         <p className="text-lg font-semibold text-accent">Result:</p>
                                         {positionSize !== null && (
                                             <p className="text-foreground">Position Size: <span className="font-medium text-accent">{positionSize.toFixed(4)}</span></p>
@@ -630,21 +631,23 @@ export default function Home() {
                             {error && <p className="text-center text-destructive">{error}</p>}
                             <div className="grid grid-cols-1 gap-y-5">
                                 {Object.keys(coinPrices).map((coinSymbol) => (
-                                    <div key={coinSymbol} className="p-4 rounded-xl shadow border border-border">
+                                    <div key={coinSymbol} className="space-y-3">
                                         <p className="text-lg font-semibold text-foreground">{coinSymbol}: <span className="text-accent">{coinPrices[coinSymbol as keyof typeof coinPrices] !== null ? `$${coinPrices[coinSymbol as keyof typeof coinPrices]!.toFixed(2)}` : 'Loading...'}</span></p>
-                                        <Input
-                                            type="text"
-                                            placeholder="Waiting Price (e.g., 20000-21000)"
-                                            className="mt-2 bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
-                                            value={waitingPrices[coinSymbol as keyof typeof waitingPrices] || ''}
-                                            onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
-                                        />
-                                        {waitingPrices[coinSymbol as keyof typeof waitingPrices] && coinPrices[coinSymbol as keyof typeof coinPrices] && (
-                                            <p className="mt-2 text-sm text-foreground">Status: <span className={cn(
-                                                getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
-                                                getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
-                                            )}>{getStatus(coinSymbol)}</span></p>
-                                        )}
+                                        <div className="p-4 rounded-xl shadow-subtle border border-border bg-card">
+                                            <Input
+                                                type="text"
+                                                placeholder="Waiting Price (e.g., 20000-21000)"
+                                                className="mt-2 bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
+                                                value={waitingPrices[coinSymbol as keyof typeof waitingPrices] || ''}
+                                                onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
+                                            />
+                                            {waitingPrices[coinSymbol as keyof typeof waitingPrices] && coinPrices[coinSymbol as keyof typeof coinPrices] && (
+                                                <p className="mt-2 text-sm text-foreground">Status: <span className={cn(
+                                                    getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
+                                                    getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
+                                                )}>{getStatus(coinSymbol)}</span></p>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -655,3 +658,4 @@ export default function Home() {
         </main>
     );
 }
+
