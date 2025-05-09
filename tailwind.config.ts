@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -63,9 +62,9 @@ export default {
   			}
   		},
   		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			lg: 'var(--radius)', // This will now be 0.75rem (12px) due to globals.css change
+  			md: 'calc(var(--radius) - 0.25rem)', // Adjusted for a 12px base: 12px - 4px = 8px
+  			sm: 'calc(var(--radius) - 0.5rem)'  // Adjusted for a 12px base: 12px - 8px = 4px
   		},
   		keyframes: {
   			'accordion-down': {
@@ -88,9 +87,11 @@ export default {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  		},
+      boxShadow: { // Added subtle shadow as per request
+        'subtle': '0 2px 6px rgba(0, 0, 0, 0.1)',
+      }
   	}
   },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;
-

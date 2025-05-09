@@ -252,14 +252,14 @@ export default function Home() {
      const calculateCryptoValues = () => {
         if (!cryptoEntry || !cryptoSL || !accountBalance) {
             setPositionSize(null);
-            setCryptoRiskRewardRatio(null); // Reset R:R if basic inputs are missing
+            setCryptoRiskRewardRatio(null); 
             return;
         }
     
         const entryPrice = parseFloat(cryptoEntry);
         const stopLossPrice = parseFloat(cryptoSL);
         const accountValue = parseFloat(accountBalance);
-        const riskPct = riskPercentage ? parseFloat(riskPercentage) / 100 : null; // Convert percentage to decimal, handle if empty
+        const riskPct = riskPercentage ? parseFloat(riskPercentage) / 100 : null; 
     
         if (isNaN(entryPrice) || isNaN(stopLossPrice) || isNaN(accountValue) || (riskPercentage && isNaN(riskPct!))) {
             setPositionSize(null);
@@ -267,7 +267,6 @@ export default function Home() {
             return;
         }
     
-        // Calculate Position Size (only if riskPercentage is provided)
         if (riskPct !== null) {
             const riskAmount = accountValue * riskPct;
             const priceDifferenceForSL = Math.abs(entryPrice - stopLossPrice);
@@ -275,13 +274,12 @@ export default function Home() {
                 const calculatedPositionSize = riskAmount / priceDifferenceForSL;
                 setPositionSize(calculatedPositionSize);
             } else {
-                setPositionSize(null); // Avoid division by zero
+                setPositionSize(null); 
             }
         } else {
-            setPositionSize(null); // Risk percentage not provided
+            setPositionSize(null); 
         }
     
-        // Calculate Risk-to-Reward Ratio (only if TP is provided)
         if (cryptoTP) {
             const takeProfitPrice = parseFloat(cryptoTP);
             if (!isNaN(takeProfitPrice)) {
@@ -291,13 +289,13 @@ export default function Home() {
                     const ratio = reward / risk;
                     setCryptoRiskRewardRatio(ratio);
                 } else {
-                    setCryptoRiskRewardRatio(null); // Avoid division by zero if risk is zero
+                    setCryptoRiskRewardRatio(null); 
                 }
             } else {
-                setCryptoRiskRewardRatio(null); // TP is invalid
+                setCryptoRiskRewardRatio(null); 
             }
         } else {
-            setCryptoRiskRewardRatio(null); // TP not provided
+            setCryptoRiskRewardRatio(null); 
         }
     };
     
@@ -309,7 +307,6 @@ export default function Home() {
     useEffect(() => {
         const fetchMarketData = async () => {
             setLoading(true);
-            // setError(null); // Keep previous error if a new fetch fails
             try {
                 const url = 'https://coinranking1.p.rapidapi.com/coins?referenceCurrencyUuid=yhjMzLPhuIDl&timePeriod=24h&tiers=1&orderBy=marketCap&orderDirection=desc&limit=50&offset=0';
                 const options = {
@@ -323,7 +320,7 @@ export default function Home() {
                 if (!response.ok) {
                     const errorMessage = `HTTP error! status: ${response.status}`;
                     setError(errorMessage);
-                    console.error("Market Price Fetch Error:", errorMessage); // Log error
+                    console.error("Market Price Fetch Error:", errorMessage); 
                     throw new Error(errorMessage);
                 }
                 const result = await response.json();
@@ -338,22 +335,18 @@ export default function Home() {
                         newCoinPrices[symbol as keyof typeof coinPrices] = parseFloat(coinData.price);
                     } else {
                         console.error(`${symbol} price not found in API response.`);
-                        // Optionally keep the old price or set to null
-                        // newCoinPrices[symbol as keyof typeof coinPrices] = null; 
-                        // setError(prevError => prevError ? `${prevError}, ${symbol} price not found` : `${symbol} price not found`);
                         anErrorOccurred = true;
                     }
                 });
                 setCoinPrices(newCoinPrices);
                 if (anErrorOccurred) {
-                    // Update error state if any coin was not found, without overwriting existing fetch errors
                     setError(prevError => {
                         const newErrorMessage = "Some coin prices not found.";
                         if (prevError && !prevError.includes(newErrorMessage)) return `${prevError}, ${newErrorMessage}`;
                         return newErrorMessage;
                     });
                 } else {
-                     setError(null); // Clear error if all coins fetched successfully
+                     setError(null); 
                 }
 
             } catch (e: any) {
@@ -365,16 +358,16 @@ export default function Home() {
         };
 
         fetchMarketData();
-        const intervalId = setInterval(fetchMarketData, 1200000); // Fetch every 20 minutes
+        const intervalId = setInterval(fetchMarketData, 1200000); 
 
-        return () => clearInterval(intervalId); // Clean up interval on unmount
+        return () => clearInterval(intervalId); 
     }, []);
 
     const sendNotification = (coin: string, price: number) => {
         const notificationTitle = 'Price Alert!';
         const notificationOptions = {
             body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-            icon: '/favicon.ico', // Ensure this icon exists in your public folder
+            icon: '/favicon.ico', 
         };
     
         console.log("Attempting to send notification...");
@@ -409,7 +402,7 @@ export default function Home() {
                 console.warn('Notification permission denied by user.');
             } else {
                 console.log('Notification permission is default. Requesting permission again just in case.');
-                requestNotificationPermission(); // Try to request again if it's default
+                requestNotificationPermission(); 
             }
         } else {
             console.warn('Notifications not supported in this browser or window context.');
@@ -418,9 +411,9 @@ export default function Home() {
     
 
     useEffect(() => {
-        // Check if the market prices are within the waiting price range
+        console.log("Checking waiting prices trigger effect...");
         const checkWaitingPrices = () => {
-            console.log("Checking waiting prices...");
+            console.log("Callback: Checking waiting prices...");
             Object.keys(coinPrices).forEach((coin: string) => {
                 const marketPrice = coinPrices[coin as keyof typeof coinPrices];
                 const waitingPrice = waitingPrices[coin as keyof typeof waitingPrices];
@@ -439,11 +432,10 @@ export default function Home() {
                 }
             });
         };
-
-        // Delay the check by a short time to ensure coinPrices are loaded
-        const timeoutId = setTimeout(checkWaitingPrices, 2000); // Increased delay
+        
+        const timeoutId = setTimeout(checkWaitingPrices, 2000); 
         return () => clearTimeout(timeoutId);
-    }, [coinPrices, waitingPrices]); // Rerun when coinPrices or waitingPrices change
+    }, [coinPrices, waitingPrices]); 
 
 
     return (
@@ -471,27 +463,27 @@ export default function Home() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="mr-3 rounded-full h-8 w-8 hover:bg-accent-secondary/20"
+                                                className="mr-3 rounded-full h-8 w-8 hover:bg-accent/20"
                                                 onClick={() => handleCompleteTask(task.id)}
                                             >
                                                 {task.completed ? (
-                                                    <Check className="h-5 w-5 text-accent-secondary"/>
+                                                    <Check className="h-5 w-5 text-accent"/>
                                                 ) : (
-                                                    <Circle className="h-5 w-5 text-foreground/50"/>
+                                                    <Circle className="h-5 w-5 text-muted-foreground"/>
                                                 )}
                                             </Button>
                                             <span
                                                 className={cn(
-                                                    'text-base',
-                                                    task.completed && 'line-through text-foreground/50'
+                                                    'text-base text-foreground',
+                                                    task.completed && 'line-through text-muted-foreground'
                                                 )}
                                             >
                                         {task.description}
                                     </span>
                                         </div>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent-primary/20 rounded-full"
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent/20 rounded-full"
                                                     onClick={() => handleDeleteTask(task.id)}>
-                                                <Trash className="h-4 w-4 text-accent-primary"/>
+                                                <Trash className="h-4 w-4 text-accent"/>
                                         </Button>
                                     </div>
                                 ))}
@@ -504,9 +496,9 @@ export default function Home() {
                                     value={newTaskDescription}
                                     onChange={(e) => setNewTaskDescription(e.target.value)}
                                     onKeyDown={handleKeyDown}
-                                    className="flex-grow bg-input text-foreground placeholder-text-secondary rounded-lg border-border focus:ring-primary focus:border-primary shadow-sm"
+                                    className="flex-grow bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                 />
-                                <Button onClick={handleAddTask} className="ml-3 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 shadow-sm px-5 py-2.5">
+                                <Button onClick={handleAddTask} className="ml-3 bg-accent text-accent-foreground rounded-xl hover:bg-accent/90 shadow-sm px-5 py-2.5">
                                     Add
                                 </Button>
                             </div>
@@ -514,40 +506,40 @@ export default function Home() {
                         <TabsContent value="Pips" className="space-y-6 p-6">
                             <div className="grid gap-5">
                                 <div className="space-y-3">
-                                    <label htmlFor="stopLoss" className="block text-sm font-medium text-text-secondary">Stop Loss</label>
+                                    <label htmlFor="stopLoss" className="block text-sm font-medium text-muted-foreground">Stop Loss</label>
                                     <Input
                                         type="number"
                                         id="stopLoss"
-                                        className="bg-input text-foreground placeholder-text-secondary rounded-lg border-border focus:ring-primary focus:border-primary shadow-sm"
+                                        className="bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                         value={stopLoss}
                                         onChange={(e) => setStopLoss(e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="entry" className="block text-sm font-medium text-text-secondary">Entry</label>
+                                    <label htmlFor="entry" className="block text-sm font-medium text-muted-foreground">Entry</label>
                                     <Input
                                         type="number"
                                         id="entry"
-                                        className="bg-input text-foreground placeholder-text-secondary rounded-lg border-border focus:ring-primary focus:border-primary shadow-sm"
+                                        className="bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                         value={entry}
                                         onChange={(e) => setEntry(e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="takeProfit" className="block text-sm font-medium text-text-secondary">Take Profit</label>
+                                    <label htmlFor="takeProfit" className="block text-sm font-medium text-muted-foreground">Take Profit</label>
                                     <Input
                                         type="number"
                                         id="takeProfit"
-                                        className="bg-input text-foreground placeholder-text-secondary rounded-lg border-border focus:ring-primary focus:border-primary shadow-sm"
+                                        className="bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                         value={takeProfit}
                                         onChange={(e) => setTakeProfit(e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="decimalPlaces" className="block text-sm font-medium text-text-secondary">Decimal Places</label>
+                                    <label htmlFor="decimalPlaces" className="block text-sm font-medium text-muted-foreground">Decimal Places</label>
                                     <select
                                         id="decimalPlaces"
-                                        className="mt-1 block w-full rounded-lg border-border bg-input text-foreground shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2.5"
+                                        className="mt-1 block w-full rounded-xl border-border bg-input text-foreground shadow-sm focus:border-ring focus:ring-ring sm:text-sm p-2.5"
                                         value={decimalPlaces}
                                         onChange={(e) => setDecimalPlaces(parseInt(e.target.value))}
                                     >
@@ -559,11 +551,11 @@ export default function Home() {
                                     </select>
                                 </div>
                                 {pipsOfRisk !== null && pipsOfReward !== null && riskRewardRatio !== null && (
-                                    <div className="space-y-2 mt-4 p-4 bg-input/50 rounded-lg shadow">
-                                        <p className="text-lg font-semibold text-result-title">Result:</p>
-                                        <p className="text-text-primary">Pips of Risk: <span className="font-medium text-accent-secondary">{pipsOfRisk.toFixed(2)}</span></p>
-                                        <p className="text-text-primary">Pips of Reward: <span className="font-medium text-accent-secondary">{pipsOfReward.toFixed(2)}</span></p>
-                                        <p className="text-text-primary">Risk/Reward Ratio: <span className="font-medium text-accent-secondary">{riskRewardRatio.toFixed(2)}</span></p>
+                                    <div className="space-y-2 mt-4 p-4 bg-secondary rounded-xl shadow">
+                                        <p className="text-lg font-semibold text-accent">Result:</p>
+                                        <p className="text-foreground">Pips of Risk: <span className="font-medium text-accent">{pipsOfRisk.toFixed(2)}</span></p>
+                                        <p className="text-foreground">Pips of Reward: <span className="font-medium text-accent">{pipsOfReward.toFixed(2)}</span></p>
+                                        <p className="text-foreground">Risk/Reward Ratio: <span className="font-medium text-accent">{riskRewardRatio.toFixed(2)}</span></p>
                                     </div>
                                 )}
                             </div>
@@ -571,86 +563,86 @@ export default function Home() {
                         <TabsContent value="Crypto" className="space-y-6 p-6">
                             <div className="grid gap-5">
                                  <div className="space-y-3">
-                                    <label htmlFor="accountBalance" className="block text-sm font-medium text-text-secondary">Account Balance</label>
+                                    <label htmlFor="accountBalance" className="block text-sm font-medium text-muted-foreground">Account Balance</label>
                                     <Input
                                         type="number"
                                         id="accountBalance"
-                                        className="bg-input text-foreground placeholder-text-secondary rounded-lg border-border focus:ring-primary focus:border-primary shadow-sm"
+                                        className="bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                         value={accountBalance}
                                         onChange={(e) => setAccountBalance(e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="cryptoEntry" className="block text-sm font-medium text-text-secondary">Entry Price</label>
+                                    <label htmlFor="cryptoEntry" className="block text-sm font-medium text-muted-foreground">Entry Price</label>
                                     <Input
                                         type="number"
                                         id="cryptoEntry"
-                                        className="bg-input text-foreground placeholder-text-secondary rounded-lg border-border focus:ring-primary focus:border-primary shadow-sm"
+                                        className="bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                         value={cryptoEntry}
                                         onChange={(e) => setCryptoEntry(e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="cryptoSL" className="block text-sm font-medium text-text-secondary">Stop Loss</label>
+                                    <label htmlFor="cryptoSL" className="block text-sm font-medium text-muted-foreground">Stop Loss</label>
                                     <Input
                                         type="number"
                                         id="cryptoSL"
-                                       className="bg-input text-foreground placeholder-text-secondary rounded-lg border-border focus:ring-primary focus:border-primary shadow-sm"
+                                       className="bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                         value={cryptoSL}
                                         onChange={(e) => setCryptoSL(e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="cryptoTP" className="block text-sm font-medium text-text-secondary">Take Profit (Optional for Position Size)</label>
+                                    <label htmlFor="cryptoTP" className="block text-sm font-medium text-muted-foreground">Take Profit (Optional for Position Size)</label>
                                     <Input
                                         type="number"
                                         id="cryptoTP"
-                                        className="bg-input text-foreground placeholder-text-secondary rounded-lg border-border focus:ring-primary focus:border-primary shadow-sm"
+                                        className="bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                         value={cryptoTP}
                                         onChange={(e) => setCryptoTP(e.target.value)}
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="riskPercentage" className="block text-sm font-medium text-text-secondary">Risk Percentage (Optional for R:R)</label>
+                                    <label htmlFor="riskPercentage" className="block text-sm font-medium text-muted-foreground">Risk Percentage (Optional for R:R)</label>
                                     <Input
                                         type="number"
                                         id="riskPercentage"
-                                        className="bg-input text-foreground placeholder-text-secondary rounded-lg border-border focus:ring-primary focus:border-primary shadow-sm"
+                                        className="bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                         value={riskPercentage}
                                         onChange={(e) => setRiskPercentage(e.target.value)}
                                     />
                                 </div>
                                 {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
-                                    <div className="space-y-2 mt-4 p-4 bg-input/50 rounded-lg shadow">
-                                        <p className="text-lg font-semibold text-result-title">Result:</p>
+                                    <div className="space-y-2 mt-4 p-4 bg-secondary rounded-xl shadow">
+                                        <p className="text-lg font-semibold text-accent">Result:</p>
                                         {positionSize !== null && (
-                                            <p className="text-text-primary">Position Size: <span className="font-medium text-accent-secondary">{positionSize.toFixed(4)}</span></p>
+                                            <p className="text-foreground">Position Size: <span className="font-medium text-accent">{positionSize.toFixed(4)}</span></p>
                                         )}
                                         {cryptoRiskRewardRatio !== null && (
-                                            <p className="text-text-primary">Risk/Reward Ratio: <span className="font-medium text-accent-secondary">{cryptoRiskRewardRatio.toFixed(2)}</span></p>
+                                            <p className="text-foreground">Risk/Reward Ratio: <span className="font-medium text-accent">{cryptoRiskRewardRatio.toFixed(2)}</span></p>
                                         )}
                                     </div>
                                 )}
                             </div>
                         </TabsContent>
                         <TabsContent value="Market" className="space-y-6 p-6">
-                            {loading && <p className="text-center text-text-secondary">Loading market data...</p>}
-                            {error && <p className="text-center text-accent-primary">{error}</p>}
+                            {loading && <p className="text-center text-muted-foreground">Loading market data...</p>}
+                            {error && <p className="text-center text-destructive">{error}</p>}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                                 {Object.keys(coinPrices).map((coinSymbol) => (
-                                    <div key={coinSymbol} className="p-4 bg-input/50 rounded-lg shadow">
-                                        <p className="text-lg font-semibold text-text-primary">{coinSymbol}: <span className="text-accent-secondary">{coinPrices[coinSymbol as keyof typeof coinPrices] !== null ? `$${coinPrices[coinSymbol as keyof typeof coinPrices]!.toFixed(2)}` : 'Loading...'}</span></p>
+                                    <div key={coinSymbol} className="p-4 bg-secondary rounded-xl shadow">
+                                        <p className="text-lg font-semibold text-foreground">{coinSymbol}: <span className="text-accent">{coinPrices[coinSymbol as keyof typeof coinPrices] !== null ? `$${coinPrices[coinSymbol as keyof typeof coinPrices]!.toFixed(2)}` : 'Loading...'}</span></p>
                                         <Input
                                             type="text"
                                             placeholder="Waiting Price (e.g., 20000-21000)"
-                                            className="mt-2 bg-input text-foreground placeholder-text-secondary rounded-lg border-border focus:ring-primary focus:border-primary shadow-sm"
+                                            className="mt-2 bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                             value={waitingPrices[coinSymbol as keyof typeof waitingPrices] || ''}
                                             onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
                                         />
                                         {waitingPrices[coinSymbol as keyof typeof waitingPrices] && coinPrices[coinSymbol as keyof typeof coinPrices] && (
-                                            <p className="mt-2 text-sm text-text-primary">Status: <span className={cn(
-                                                getStatus(coinSymbol) === 'Within' ? 'text-accent-secondary' : 
-                                                getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-accent-primary' : 'text-text-secondary'
+                                            <p className="mt-2 text-sm text-foreground">Status: <span className={cn(
+                                                getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
+                                                getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
                                             )}>{getStatus(coinSymbol)}</span></p>
                                         )}
                                     </div>
