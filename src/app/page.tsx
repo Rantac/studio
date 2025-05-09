@@ -1,4 +1,3 @@
-
 'use client';
 
 import {useState, useEffect, useRef} from 'react';
@@ -197,17 +196,20 @@ export default function Home() {
 
     useEffect(() => {
       const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalize today to the start of the day for consistent comparison
       const currentYear = today.getFullYear();
     
       let upcomingMeetingData: { month: string; startDay: number; endDay: number; year: number } | null = null;
     
       // Check meetings for the current year
       for (const meeting of fomcMeetingDates) {
-        // Ensure meeting.endDay is treated as the end of that day for comparison
-        const meetingEndDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.endDay, 23, 59, 59);
+        // Meeting's end date, set to the very end of that day
+        const meetingEndDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.endDay, 23, 59, 59, 999);
+        
+        // If today is on or before the meeting's end date, this is the upcoming/ongoing meeting
         if (meetingEndDate >= today) {
           upcomingMeetingData = { ...meeting, year: currentYear };
-          break;
+          break; 
         }
       }
     
@@ -447,6 +449,7 @@ export default function Home() {
                     } else {
                         console.warn('Service Worker not available, not ready, or not controlling the page for mobile notification.');
                          try {
+                            // Fallback for mobile if service worker fails, though it might also fail here.
                             new Notification(notificationTitle, notificationOptions); 
                             console.log('Fallback: Notification sent via Notification API on mobile.');
                         } catch (err) {
@@ -497,9 +500,10 @@ export default function Home() {
             });
         };
         
-        const timeoutId = setTimeout(checkWaitingPrices, 2000); 
+        // Check prices shortly after initial data fetch and then rely on interval.
+        const timeoutId = setTimeout(checkWaitingPrices, 2000); // Check 2s after initial data load or update
         return () => clearTimeout(timeoutId);
-    }, [coinPrices, waitingPrices]); 
+    }, [coinPrices, waitingPrices]); // Rerun when coinPrices or waitingPrices change
 
 
     return (
@@ -720,6 +724,5 @@ export default function Home() {
         </main>
     );
 }
-
 
 
