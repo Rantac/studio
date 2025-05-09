@@ -505,9 +505,6 @@ export default function Home() {
                                     onKeyDown={handleKeyDown}
                                     className="flex-grow bg-input text-foreground placeholder:text-muted-foreground rounded-xl border-border focus:ring-ring focus:border-ring shadow-sm"
                                 />
-                                <Button onClick={handleAddTask} className="ml-3 bg-accent text-accent-foreground rounded-xl hover:bg-accent/90 shadow-sm px-5 py-2.5">
-                                    Add
-                                </Button>
                             </div>
                         </TabsContent>
                         <TabsContent value="Pips" className="space-y-6 p-6">
@@ -637,8 +634,8 @@ export default function Home() {
                             {error && <p className="text-center text-destructive">{error}</p>}
                             <div className="grid grid-cols-1 gap-y-5">
                                 {Object.keys(coinPrices).map((coinSymbol) => (
-                                    <div key={coinSymbol} className="space-y-2"> {/* Reduced space-y from 3 to 2 */}
-                                        <p className="text-lg text-foreground">{coinSymbol}: <span className="text-accent">{coinPrices[coinSymbol as keyof typeof coinPrices] !== null ? `$${coinPrices[coinSymbol as keyof typeof coinPrices]!.toFixed(2)}` : 'Loading...'}</span></p>
+                                    <div key={coinSymbol} className="space-y-2">
+                                        <p className="text-lg text-foreground font-normal">{coinSymbol}: <span className="text-accent">{coinPrices[coinSymbol as keyof typeof coinPrices] !== null ? `$${coinPrices[coinSymbol as keyof typeof coinPrices]!.toFixed(2)}` : 'Loading...'}</span></p>
                                         
                                         <Input
                                             type="text"
