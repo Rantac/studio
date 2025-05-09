@@ -378,7 +378,7 @@ export default function Home() {
                 console.log("Notification permission granted.");
                 if (isMobile()) {
                     console.log("Mobile device detected. Using Service Worker for notification.");
-                    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) { // Check if service worker is active
+                    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) { 
                         navigator.serviceWorker.ready.then(registration => {
                             console.log("Service Worker is ready. Attempting to show notification.");
                             registration.showNotification(notificationTitle, notificationOptions)
@@ -389,7 +389,6 @@ export default function Home() {
                         });
                     } else {
                         console.warn('Service Worker not available, not ready, or not controlling the page for mobile notification.');
-                        // Fallback for mobile if SW isn't controlling, though direct Notification API might be blocked.
                          try {
                             new Notification(notificationTitle, notificationOptions);
                             console.log('Fallback: Notification sent via Notification API on mobile.');
@@ -638,7 +637,7 @@ export default function Home() {
                             {error && <p className="text-center text-destructive">{error}</p>}
                             <div className="grid grid-cols-1 gap-y-5">
                                 {Object.keys(coinPrices).map((coinSymbol) => (
-                                    <div key={coinSymbol} className="space-y-3">
+                                    <div key={coinSymbol} className="space-y-2"> {/* Reduced space-y from 3 to 2 */}
                                         <p className="text-lg font-semibold text-foreground">{coinSymbol}: <span className="text-accent">{coinPrices[coinSymbol as keyof typeof coinPrices] !== null ? `$${coinPrices[coinSymbol as keyof typeof coinPrices]!.toFixed(2)}` : 'Loading...'}</span></p>
                                         
                                         <Input
@@ -664,4 +663,3 @@ export default function Home() {
         </main>
     );
 }
-
