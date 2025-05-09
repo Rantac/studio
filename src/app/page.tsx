@@ -150,7 +150,7 @@ export default function Home() {
         
         requestNotificationPermission();
 
-        if ('serviceWorker' in navigator) {
+        if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.js')
                 .then(registration => console.log('Service Worker registered with scope:', registration.scope))
                 .catch(error => console.error('Service worker registration failed:', error));
@@ -628,9 +628,9 @@ export default function Home() {
                         <TabsContent value="Market" className="space-y-6 p-6">
                             {loading && <p className="text-center text-muted-foreground">Loading market data...</p>}
                             {error && <p className="text-center text-destructive">{error}</p>}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                            <div className="grid grid-cols-1 gap-y-5">
                                 {Object.keys(coinPrices).map((coinSymbol) => (
-                                    <div key={coinSymbol} className="p-4 bg-secondary rounded-xl shadow">
+                                    <div key={coinSymbol} className="p-4 rounded-xl shadow border border-border">
                                         <p className="text-lg font-semibold text-foreground">{coinSymbol}: <span className="text-accent">{coinPrices[coinSymbol as keyof typeof coinPrices] !== null ? `$${coinPrices[coinSymbol as keyof typeof coinPrices]!.toFixed(2)}` : 'Loading...'}</span></p>
                                         <Input
                                             type="text"
