@@ -597,7 +597,7 @@ export default function Home() {
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="cryptoTP" className="block text-sm font-medium text-muted-foreground">Take Profit (Optional for Position Size)</label>
+                                    <label htmlFor="cryptoTP" className="block text-sm font-medium text-muted-foreground">Take Profit</label>
                                     <Input
                                         type="number"
                                         id="cryptoTP"
@@ -607,7 +607,7 @@ export default function Home() {
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label htmlFor="riskPercentage" className="block text-sm font-medium text-muted-foreground">Risk Percentage (Optional for R:R)</label>
+                                    <label htmlFor="riskPercentage" className="block text-sm font-medium text-muted-foreground">Risk Percentage</label>
                                     <Input
                                         type="number"
                                         id="riskPercentage"
