@@ -105,7 +105,11 @@ export default function Home() {
         if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.js')
                 .then(registration => console.log('Service Worker registered with scope:', registration.scope))
-                .catch(error => console.error('Service worker registration failed:', error));
+                .catch(error => {
+                    console.error('Service worker registration failed:', error);
+                    // Fallback or error handling if SW registration fails.
+                    // For example, disable SW-specific features or notify the user.
+                });
         }
     }, []);
 
@@ -135,6 +139,7 @@ export default function Home() {
       }
 
       if (!upcomingMeetingData && sortedMeetings.length > 0) {
+        // If all meetings for the current year have passed, show the first meeting of the next year.
         upcomingMeetingData = { ...sortedMeetings[0], year: currentYear + 1 };
       }
 
@@ -212,7 +217,7 @@ export default function Home() {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const result = await response.json();
                 
-                const coinsToUpdate = ["BTC", "ETH", "BNB", "SOL", "TON", "LTC", "XRP", "XLM", "LINK"];
+                const coinsToUpdate = Object.keys(coinPrices);
                 const newPrices = { ...coinPrices };
                 coinsToUpdate.forEach(symbol => {
                     const coinData = result.data.coins.find((c: any) => c.symbol === symbol);
@@ -220,7 +225,9 @@ export default function Home() {
                     if (!coinData) console.warn(`${symbol} price not found.`);
                 });
                 setCoinPrices(newPrices);
-            } catch (e: any) { console.error("Market Price Fetch API Error:", e); setError(e.message);
+            } catch (e: any) { 
+                console.error("Market Price Fetch API Error:", e); 
+                setError(e.message);
             } finally { setLoading(false); }
         };
         fetchMarketData();
@@ -232,7 +239,7 @@ export default function Home() {
         const notificationTitle = 'Price Alert!';
         const notificationOptions: NotificationOptions = {
             body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-            icon: '/favicon.ico',
+            icon: '/favicon.ico', // Ensure this icon exists in your public folder
         };
         console.log("Attempting to send notification...");
 
@@ -242,12 +249,13 @@ export default function Home() {
                 if (isMobile() && 'serviceWorker' in navigator && navigator.serviceWorker.controller) {
                     console.log("Mobile device detected. Using Service Worker for notification.");
                     navigator.serviceWorker.ready.then(registration => {
-                        console.log("Service Worker is ready. Attempting to show notification.");
+                        console.log("Service Worker is ready. Attempting to show notification via SW.");
                         registration.showNotification(notificationTitle, notificationOptions)
                             .then(() => console.log('Notification sent via Service Worker.'))
                             .catch(err => { 
                                 console.error('Service Worker notification error:', err);
                                 console.log("Falling back to Notification API for mobile due to SW error.");
+                                // Fallback for mobile if SW fails (though this path might be problematic if constructor is illegal)
                                 try {
                                     new Notification(notificationTitle, notificationOptions);
                                     console.log('Notification sent via Notification API on mobile (fallback).');
@@ -266,14 +274,21 @@ export default function Home() {
                         }
                     });
                 } else {
-                    console.log("Desktop or no SW. Using Notification API.");
+                    // Desktop or no service worker controller
+                    console.log("Desktop or no SW controller. Using Notification API directly.");
                     try {
                         new Notification(notificationTitle, notificationOptions);
                         console.log('Notification sent via Notification API.');
-                    } catch (err) { console.error('Notification API error:', err); }
+                    } catch (err) {
+                        console.error('Desktop Notification API error:', err);
+                    }
                 }
-            } else { console.warn('Notification permission not granted.'); }
-        } else { console.warn('Notifications not supported.'); }
+            } else {
+                console.warn('Notification permission not granted.');
+            }
+        } else {
+            console.warn('Notifications not supported in this environment.');
+        }
     };
     
     useEffect(() => {
@@ -437,7 +452,7 @@ export default function Home() {
                         <div className="space-y-4">
                             {loading && <p className="text-center text-muted-foreground">Loading market data...</p>}
                             {error && <p className="text-center text-destructive">{error}</p>}
-                            <div className="grid grid-cols-1 gap-y-4">
+                            <div className="grid grid-cols-1 gap-y-6">
                                 {Object.keys(coinPrices).map((coinSymbol) => (
                                     <div key={coinSymbol} className="space-y-2 pb-2">
                                         <p className="text-lg text-foreground font-normal px-3 pt-2">
@@ -485,3 +500,4 @@ export default function Home() {
         </main>
     );
 }
+
