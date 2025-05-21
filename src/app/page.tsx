@@ -120,7 +120,6 @@ export default function Home() {
       const currentYear = today.getFullYear();
       let upcomingMeetingData: { month: string; startDay: number; endDay: number; year: number } | null = null;
 
-      // Sort meetings to handle year rollover correctly
       const sortedMeetings = [...fomcMeetingDates].sort((a, b) => {
         const dateA = new Date(currentYear, getMonthIndex(a.month), a.startDay);
         const dateB = new Date(currentYear, getMonthIndex(b.month), b.startDay);
@@ -136,7 +135,6 @@ export default function Home() {
       }
 
       if (!upcomingMeetingData && sortedMeetings.length > 0) {
-        // If all meetings for the current year have passed, show the first meeting of the next year
         upcomingMeetingData = { ...sortedMeetings[0], year: currentYear + 1 };
       }
 
@@ -234,7 +232,7 @@ export default function Home() {
         const notificationTitle = 'Price Alert!';
         const notificationOptions: NotificationOptions = {
             body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-            icon: '/favicon.ico', // Ensure you have a favicon.ico in your public folder
+            icon: '/favicon.ico',
         };
         console.log("Attempting to send notification...");
 
@@ -247,8 +245,26 @@ export default function Home() {
                         console.log("Service Worker is ready. Attempting to show notification.");
                         registration.showNotification(notificationTitle, notificationOptions)
                             .then(() => console.log('Notification sent via Service Worker.'))
-                            .catch(err => console.error('Service Worker notification error:', err));
-                    }).catch(swReadyError => console.error("Service Worker ready error:", swReadyError));
+                            .catch(err => { 
+                                console.error('Service Worker notification error:', err);
+                                console.log("Falling back to Notification API for mobile due to SW error.");
+                                try {
+                                    new Notification(notificationTitle, notificationOptions);
+                                    console.log('Notification sent via Notification API on mobile (fallback).');
+                                } catch (fallbackErr) {
+                                    console.error('Mobile fallback Notification API error:', fallbackErr);
+                                }
+                            });
+                    }).catch(swReadyError => {
+                        console.error("Service Worker ready error:", swReadyError);
+                        console.log("Falling back to Notification API for mobile due to SW ready error.");
+                         try {
+                            new Notification(notificationTitle, notificationOptions);
+                            console.log('Notification sent via Notification API on mobile (fallback SW ready error).');
+                        } catch (fallbackErr) {
+                            console.error('Mobile fallback SW ready Notification API error:', fallbackErr);
+                        }
+                    });
                 } else {
                     console.log("Desktop or no SW. Using Notification API.");
                     try {
@@ -297,7 +313,7 @@ export default function Home() {
         <main className="flex flex-col h-screen bg-background">
             <header className="p-4 border-b border-border bg-card shadow-sm">
                 <div className="flex items-center justify-between max-w-md mx-auto">
-                    <h1 className="text-2xl font-bold text-foreground">PX</h1>
+                    <h1 className="text-2xl font-bold text-black">PX</h1>
                     {fomcDateString && (
                         <span className="text-sm text-muted-foreground whitespace-nowrap">{fomcDateString}</span>
                     )}
@@ -424,24 +440,24 @@ export default function Home() {
                             <div className="grid grid-cols-1 gap-y-4">
                                 {Object.keys(coinPrices).map((coinSymbol) => (
                                     <div key={coinSymbol} className="space-y-2 pb-2">
-                                        <p className="text-lg text-foreground font-normal px-3 pt-2">{coinSymbol}: <span className="text-primary">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span></p>
-                                        <Card className="mx-3">
-                                            <CardContent className="p-3 space-y-2">
-                                                <Input
-                                                    type="text"
-                                                    placeholder="Waiting Price (e.g., 20000-21000)"
-                                                    className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle"
-                                                    value={waitingPrices[coinSymbol] || ''}
-                                                    onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
-                                                />
-                                                {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && (
-                                                    <p className="mt-1 text-sm text-foreground">Status: <span className={cn(
-                                                        getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
-                                                        getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
-                                                    )}>{getStatus(coinSymbol)}</span></p>
-                                                )}
-                                            </CardContent>
-                                        </Card>
+                                        <p className="text-lg text-foreground font-normal px-3 pt-2">
+                                            {coinSymbol}: <span className="text-primary">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span>
+                                        </p>
+                                        <div className="mx-3 space-y-2">
+                                            <Input
+                                                type="text"
+                                                placeholder="Waiting Price (e.g., 20000-21000)"
+                                                className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle"
+                                                value={waitingPrices[coinSymbol] || ''}
+                                                onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
+                                            />
+                                            {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && (
+                                                <p className="text-sm text-foreground">Status: <span className={cn(
+                                                    getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
+                                                    getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
+                                                )}>{getStatus(coinSymbol)}</span></p>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -468,5 +484,4 @@ export default function Home() {
             </nav>
         </main>
     );
-
-    
+}
