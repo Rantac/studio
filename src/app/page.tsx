@@ -1,3 +1,4 @@
+
 'use client';
 
 import {useState, useEffect, useRef} from 'react';
@@ -119,16 +120,26 @@ export default function Home() {
       const currentYear = today.getFullYear();
       let upcomingMeetingData: { month: string; startDay: number; endDay: number; year: number } | null = null;
 
-      for (const meeting of fomcMeetingDates) {
+      // Sort meetings to handle year rollover correctly
+      const sortedMeetings = [...fomcMeetingDates].sort((a, b) => {
+        const dateA = new Date(currentYear, getMonthIndex(a.month), a.startDay);
+        const dateB = new Date(currentYear, getMonthIndex(b.month), b.startDay);
+        return dateA.getTime() - dateB.getTime();
+      });
+      
+      for (const meeting of sortedMeetings) {
         const meetingEndDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.endDay, 23, 59, 59, 999);
         if (meetingEndDate >= today) {
           upcomingMeetingData = { ...meeting, year: currentYear };
           break; 
         }
       }
-      if (!upcomingMeetingData && fomcMeetingDates.length > 0) {
-        upcomingMeetingData = { ...fomcMeetingDates[0], year: currentYear + 1 };
+
+      if (!upcomingMeetingData && sortedMeetings.length > 0) {
+        // If all meetings for the current year have passed, show the first meeting of the next year
+        upcomingMeetingData = { ...sortedMeetings[0], year: currentYear + 1 };
       }
+
       if (upcomingMeetingData) {
         setFomcDateString(`FOMC: ${upcomingMeetingData.month} ${upcomingMeetingData.startDay}-${upcomingMeetingData.endDay}`);
       } else {
@@ -223,7 +234,7 @@ export default function Home() {
         const notificationTitle = 'Price Alert!';
         const notificationOptions: NotificationOptions = {
             body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-            icon: '/favicon.ico',
+            icon: '/favicon.ico', // Ensure you have a favicon.ico in your public folder
         };
         console.log("Attempting to send notification...");
 
@@ -412,21 +423,25 @@ export default function Home() {
                             {error && <p className="text-center text-destructive">{error}</p>}
                             <div className="grid grid-cols-1 gap-y-4">
                                 {Object.keys(coinPrices).map((coinSymbol) => (
-                                    <div key={coinSymbol} className="space-y-2 p-3 bg-card rounded-lg border border-border shadow-sm">
-                                        <p className="text-lg text-foreground font-normal">{coinSymbol}: <span className="text-primary">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span></p>
-                                        <Input
-                                            type="text"
-                                            placeholder="Waiting Price (e.g., 20000-21000)"
-                                            className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle"
-                                            value={waitingPrices[coinSymbol] || ''}
-                                            onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
-                                        />
-                                        {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && (
-                                            <p className="mt-1 text-sm text-foreground">Status: <span className={cn(
-                                                getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
-                                                getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
-                                            )}>{getStatus(coinSymbol)}</span></p>
-                                        )}
+                                    <div key={coinSymbol} className="space-y-2 pb-2">
+                                        <p className="text-lg text-foreground font-normal px-3 pt-2">{coinSymbol}: <span className="text-primary">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span></p>
+                                        <Card className="mx-3">
+                                            <CardContent className="p-3 space-y-2">
+                                                <Input
+                                                    type="text"
+                                                    placeholder="Waiting Price (e.g., 20000-21000)"
+                                                    className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle"
+                                                    value={waitingPrices[coinSymbol] || ''}
+                                                    onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
+                                                />
+                                                {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && (
+                                                    <p className="mt-1 text-sm text-foreground">Status: <span className={cn(
+                                                        getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
+                                                        getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
+                                                    )}>{getStatus(coinSymbol)}</span></p>
+                                                )}
+                                            </CardContent>
+                                        </Card>
                                     </div>
                                 ))}
                             </div>
@@ -453,4 +468,5 @@ export default function Home() {
             </nav>
         </main>
     );
-}
+
+    
