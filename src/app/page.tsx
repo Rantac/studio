@@ -463,13 +463,12 @@ export default function Home() {
                             <div className="grid grid-cols-1 gap-y-2">
                                 {Object.keys(coinPrices).map((coinSymbol) => (
                                     <div key={coinSymbol} className="space-y-2 pb-2">
-                                        <p className="text-lg text-foreground font-normal px-3 pt-2">
+                                        <p className="text-lg text-foreground px-3 pt-2">
                                             {coinSymbol}: <span className="text-primary">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span>
                                         </p>
                                         <div className="mx-3 space-y-2">
                                             <Input
                                                 type="text"
-                                                placeholder="Waiting Price (e.g., 20000-21000)"
                                                 className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle"
                                                 value={waitingPrices[coinSymbol] || ''}
                                                 onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
