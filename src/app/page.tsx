@@ -407,32 +407,30 @@ export default function Home() {
                         </Card>
                     )}
                     {activeTab === 'market' && (
-                        <Card className="shadow-subtle rounded-lg">
-                            <CardContent className="p-4 space-y-4">
-                                {loading && <p className="text-center text-muted-foreground">Loading market data...</p>}
-                                {error && <p className="text-center text-destructive">{error}</p>}
-                                <div className="grid grid-cols-1 gap-y-4">
-                                    {Object.keys(coinPrices).map((coinSymbol) => (
-                                        <div key={coinSymbol} className="space-y-2 p-3 bg-card rounded-lg border border-border shadow-sm">
-                                            <p className="text-lg text-foreground font-normal">{coinSymbol}: <span className="text-primary">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span></p>
-                                            <Input
-                                                type="text"
-                                                placeholder="Waiting Price (e.g., 20000-21000)"
-                                                className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle"
-                                                value={waitingPrices[coinSymbol] || ''}
-                                                onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
-                                            />
-                                            {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && (
-                                                <p className="mt-1 text-sm text-foreground">Status: <span className={cn(
-                                                    getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
-                                                    getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
-                                                )}>{getStatus(coinSymbol)}</span></p>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <div className="space-y-4">
+                            {loading && <p className="text-center text-muted-foreground">Loading market data...</p>}
+                            {error && <p className="text-center text-destructive">{error}</p>}
+                            <div className="grid grid-cols-1 gap-y-4">
+                                {Object.keys(coinPrices).map((coinSymbol) => (
+                                    <div key={coinSymbol} className="space-y-2 p-3 bg-card rounded-lg border border-border shadow-sm">
+                                        <p className="text-lg text-foreground font-normal">{coinSymbol}: <span className="text-primary">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span></p>
+                                        <Input
+                                            type="text"
+                                            placeholder="Waiting Price (e.g., 20000-21000)"
+                                            className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle"
+                                            value={waitingPrices[coinSymbol] || ''}
+                                            onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
+                                        />
+                                        {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && (
+                                            <p className="mt-1 text-sm text-foreground">Status: <span className={cn(
+                                                getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
+                                                getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
+                                            )}>{getStatus(coinSymbol)}</span></p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>
