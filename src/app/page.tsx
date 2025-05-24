@@ -136,7 +136,6 @@ export default function Home() {
       
       for (const meeting of sortedMeetings) {
         const meetingStartDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.startDay);
-        // Consider the meeting relevant if today is before or on the end day
         const meetingEndDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.endDay, 23, 59, 59, 999);
         
         if (today <= meetingEndDate) {
@@ -145,7 +144,6 @@ export default function Home() {
         }
       }
 
-      // If all meetings for the current year have passed, show the first meeting of next year
       if (!upcomingMeetingData && sortedMeetings.length > 0) {
         upcomingMeetingData = { ...sortedMeetings[0], year: currentYear + 1 };
       }
@@ -153,7 +151,7 @@ export default function Home() {
       if (upcomingMeetingData) {
         setFomcDateString(`FOMC: ${upcomingMeetingData.month} ${upcomingMeetingData.startDay}-${upcomingMeetingData.endDay}`);
       } else {
-        setFomcDateString('FOMC: TBD'); // Should not happen if fomcMeetingDates is populated
+        setFomcDateString('FOMC: TBD');
       }
     }, []);
 
@@ -343,7 +341,7 @@ export default function Home() {
 
 
     return (
-        <main className="relative flex size-full min-h-screen flex-col bg-white justify-between group/design-root overflow-x-hidden">
+        <main className="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden">
             <div>
                 <header className="flex items-center bg-white p-3 pb-1 justify-between">
                     <h1 className="text-[#141414] text-base font-bold leading-tight tracking-[-0.015em] flex-1">PX</h1>
@@ -354,7 +352,7 @@ export default function Home() {
                     )}
                 </header>
 
-                <div className="flex-grow overflow-y-auto p-3 pb-[68px]"> {/* Reduced bottom padding */}
+                <div className="flex-grow overflow-y-auto p-3 pb-[68px]">
                     <div className="w-full max-w-md mx-auto">
                         {activeTab === 'epic-notes' && (
                             <div className="space-y-3">
@@ -484,8 +482,8 @@ export default function Home() {
                 </div>
             </div>
             
-            <div>
-              <div className="flex gap-2 border-t border-[#f2f2f2] bg-white px-3 pb-2 pt-1">
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#f2f2f2]">
+              <div className="flex gap-2 px-3 pb-2 pt-1">
                   {navItems.map(item => (
                       <button 
                           key={item.id}
@@ -500,14 +498,11 @@ export default function Home() {
                             activeTab === item.id ? "text-[#141414]" : "text-[#757575]")}>
                               <item.icon className="h-5 w-5" /> 
                           </div>
-                           {/* <span className="text-xs">{item.label}</span> */}
                       </button>
                   ))}
               </div>
-              <div className="h-3 bg-white"></div> {/* Safe area padding for bottom */}
+              <div className="h-3 bg-white"></div>
             </div>
         </main>
     );
 }
-
-    
