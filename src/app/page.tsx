@@ -2,9 +2,8 @@
 'use client';
 
 import {useState, useEffect, useRef} from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, Circle, Trash, Plus, Notebook, DollarSign, Calculator, LineChart } from 'lucide-react';
+import { Check, Circle, Trash, Notebook, DollarSign, Bitcoin, LineChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { useToast } from "@/hooks/use-toast";
@@ -75,7 +74,7 @@ export default function Home() {
     const [waitingPrices, setWaitingPrices] = useState<{ [key: string]: string | null }>({
         BTC: null, ETH: null, BNB: null, SOL: null, TON: null, LTC: null, XRP: null, XLM: null, LINK: null,
     });
-
+    
     const isMobile = () => {
         if (typeof window === 'undefined') return false;
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -109,7 +108,7 @@ export default function Home() {
         
         requestNotificationPermission();
 
-        if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+        if (typeof window !== 'undefined' && 'serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
             navigator.serviceWorker.register('/service-worker.js')
                 .then(registration => console.log('Service Worker registered with scope:', registration.scope))
                 .catch(error => {
@@ -139,7 +138,6 @@ export default function Home() {
         const meetingStartDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.startDay);
         const meetingEndDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.endDay, 23, 59, 59, 999);
         
-        // Check if today is within the meeting days or if the meeting is in the future
         if (today <= meetingEndDate) {
             upcomingMeetingData = { ...meeting, year: currentYear };
             break;
@@ -147,7 +145,6 @@ export default function Home() {
       }
 
       if (!upcomingMeetingData && sortedMeetings.length > 0) {
-        // If all meetings for the current year have passed, show the first meeting of the next year.
         upcomingMeetingData = { ...sortedMeetings[0], year: currentYear + 1 };
       }
 
@@ -185,61 +182,68 @@ export default function Home() {
     useEffect(calculatePips, [stopLoss, entry, takeProfit, decimalPlaces]);
 
     const calculateCryptoValues = () => {
-        if (!cryptoEntry || !cryptoSL || !accountBalance) { setPositionSize(null); setCryptoRiskRewardRatio(null); return; }
-        const entryP = parseFloat(cryptoEntry), slP = parseFloat(cryptoSL), accVal = parseFloat(accountBalance);
+        const entryP = parseFloat(cryptoEntry);
+        const slP = parseFloat(cryptoSL);
+        const accVal = parseFloat(accountBalance);
         const riskPctVal = riskPercentage ? parseFloat(riskPercentage) / 100 : null;
-
-        if (isNaN(entryP) || isNaN(slP) || isNaN(accVal) || (riskPercentage && isNaN(riskPctVal!))) {
-            setPositionSize(null); setCryptoRiskRewardRatio(null); return;
+        const tpP = cryptoTP ? parseFloat(cryptoTP) : null;
+    
+        if (isNaN(entryP) || isNaN(slP)) {
+             setPositionSize(null); 
+             setCryptoRiskRewardRatio(null);
+             return;
         }
-        if (riskPctVal !== null) {
+
+        if (!isNaN(accVal) && riskPctVal !== null && riskPctVal > 0) {
             const riskAmount = accVal * riskPctVal;
             const priceDiffSL = Math.abs(entryP - slP);
             setPositionSize(priceDiffSL > 0 ? riskAmount / priceDiffSL : null);
-        } else { setPositionSize(null); }
-
-        if (cryptoTP) {
-            const tpP = parseFloat(cryptoTP);
-            if (!isNaN(tpP)) {
-                const risk = Math.abs(entryP - slP);
-                const reward = Math.abs(tpP - entryP);
-                setCryptoRiskRewardRatio(risk > 0 ? reward / risk : null);
-            } else { setCryptoRiskRewardRatio(null); }
-        } else { setCryptoRiskRewardRatio(null); }
+        } else {
+            setPositionSize(null);
+        }
+    
+        if (tpP !== null && !isNaN(tpP)) {
+            const risk = Math.abs(entryP - slP);
+            const reward = Math.abs(tpP - entryP);
+            setCryptoRiskRewardRatio(risk > 0 ? reward / risk : null);
+        } else {
+            setCryptoRiskRewardRatio(null);
+        }
     };
     useEffect(calculateCryptoValues, [cryptoEntry, cryptoSL, cryptoTP, riskPercentage, accountBalance]);
     
+    const fetchMarketData = async () => {
+        setLoading(true); setError(null);
+        try {
+            const url = 'https://coinranking1.p.rapidapi.com/coins?referenceCurrencyUuid=yhjMzLPhuIDl&timePeriod=24h&tiers=1&orderBy=marketCap&orderDirection=desc&limit=50&offset=0';
+            const options = {
+                method: 'GET',
+                headers: {
+                    'x-rapidapi-key': 'f0ad4a4797msh17ff46665ba9c66p1e5399jsnd422cb1c94df',
+                    'x-rapidapi-host': 'coinranking1.p.rapidapi.com'
+                }
+            };
+            const response = await fetch(url, options);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const result = await response.json();
+            
+            const coinsToUpdate = Object.keys(coinPrices);
+            const newPrices = { ...coinPrices };
+            coinsToUpdate.forEach(symbol => {
+                const coinData = result.data.coins.find((c: any) => c.symbol === symbol);
+                newPrices[symbol] = coinData ? parseFloat(coinData.price) : null;
+                 if (!coinData) console.warn(`${symbol} price not found.`);
+            });
+            setCoinPrices(newPrices);
+        } catch (e: any) { 
+            console.error("Market Price Fetch API Error:", e); 
+            setError(e.message);
+        } finally { setLoading(false); }
+    };
+
     useEffect(() => {
-        const fetchMarketData = async () => {
-            setLoading(true); setError(null);
-            try {
-                const url = 'https://coinranking1.p.rapidapi.com/coins?referenceCurrencyUuid=yhjMzLPhuIDl&timePeriod=24h&tiers=1&orderBy=marketCap&orderDirection=desc&limit=50&offset=0';
-                const options = {
-                    method: 'GET',
-                    headers: {
-                        'x-rapidapi-key': 'f0ad4a4797msh17ff46665ba9c66p1e5399jsnd422cb1c94df',
-                        'x-rapidapi-host': 'coinranking1.p.rapidapi.com'
-                    }
-                };
-                const response = await fetch(url, options);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const result = await response.json();
-                
-                const coinsToUpdate = Object.keys(coinPrices);
-                const newPrices = { ...coinPrices };
-                coinsToUpdate.forEach(symbol => {
-                    const coinData = result.data.coins.find((c: any) => c.symbol === symbol);
-                    newPrices[symbol] = coinData ? parseFloat(coinData.price) : null;
-                    if (!coinData) console.warn(`${symbol} price not found.`);
-                });
-                setCoinPrices(newPrices);
-            } catch (e: any) { 
-                console.error("Market Price Fetch API Error:", e); 
-                setError(e.message);
-            } finally { setLoading(false); }
-        };
         fetchMarketData();
-        const intervalId = setInterval(fetchMarketData, 20 * 60 * 1000); // 20 minutes
+        const intervalId = setInterval(fetchMarketData, 20 * 60 * 1000); 
         return () => clearInterval(intervalId);
     }, []);
 
@@ -247,51 +251,52 @@ export default function Home() {
         const notificationTitle = 'Price Alert!';
         const notificationOptions: NotificationOptions = {
             body: `${coin} is within your waiting price range at $${price.toFixed(2)}`,
-            icon: '/favicon.ico', 
+            icon: '/icon-192x192.png', 
         };
-        console.log("Attempting to send notification...");
+        console.log("Attempting to send notification for:", coin, price);
 
         if (typeof window !== 'undefined' && 'Notification' in window) {
+             console.log("Notification API available. Permission:", Notification.permission);
             if (Notification.permission === 'granted') {
-                console.log("Notification permission granted.");
+                 console.log("Permission granted.");
                 if (isMobile() && 'serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                    console.log("Mobile device detected. Using Service Worker for notification.");
+                    console.log("Mobile device & SW active. Using Service Worker for notification.");
                     navigator.serviceWorker.ready.then(registration => {
-                        console.log("Service Worker is ready. Attempting to show notification via SW.");
+                        console.log("Service Worker is ready. Attempting to show notification via SW for", coin);
                         registration.showNotification(notificationTitle, notificationOptions)
-                            .then(() => console.log('Notification sent via Service Worker.'))
+                            .then(() => console.log('Notification sent via Service Worker for', coin))
                             .catch(err => { 
-                                console.error('Service Worker notification error:', err);
-                                console.log("Falling back to Notification API for mobile due to SW error.");
+                                console.error('Service Worker notification error for', coin, ':', err);
+                                console.log("Falling back to Notification API for mobile due to SW error for", coin);
                                 try {
                                     new Notification(notificationTitle, notificationOptions);
-                                    console.log('Notification sent via Notification API on mobile (fallback).');
+                                    console.log('Notification sent via Notification API on mobile (fallback) for', coin);
                                 } catch (fallbackErr) {
-                                    console.error('Mobile fallback Notification API error:', fallbackErr);
+                                    console.error('Mobile fallback Notification API error for', coin, ':', fallbackErr);
                                 }
                             });
                     }).catch(swReadyError => {
-                        console.error("Service Worker ready error:", swReadyError);
-                        console.log("Falling back to Notification API for mobile due to SW ready error.");
+                        console.error("Service Worker ready error for", coin, ":", swReadyError);
+                        console.log("Falling back to Notification API for mobile due to SW ready error for", coin);
                          try {
                             new Notification(notificationTitle, notificationOptions);
-                            console.log('Notification sent via Notification API on mobile (fallback SW ready error).');
+                            console.log('Notification sent via Notification API on mobile (fallback SW ready error) for', coin);
                         } catch (fallbackErr) {
-                            console.error('Mobile fallback SW ready Notification API error:', fallbackErr);
+                            console.error('Mobile fallback SW ready Notification API error for', coin, ':', fallbackErr);
                         }
                     });
                 } else {
-                    console.log("Desktop or no SW controller. Using Notification API directly.");
+                    console.log("Desktop or no SW controller. Using Notification API directly for", coin);
                     try {
                         new Notification(notificationTitle, notificationOptions);
-                        console.log('Notification sent via Notification API.');
+                        console.log('Notification sent via Notification API for', coin);
                     } catch (err) {
-                        console.error('Desktop Notification API error:', err);
+                        console.error('Desktop Notification API error for', coin, ':', err);
                     }
                 }
             } else {
                 console.warn('Notification permission not granted. Please enable notifications in your browser settings.');
-                requestNotificationPermission(); // Re-request if not granted
+                requestNotificationPermission(); 
             }
         } else {
             console.warn('Notifications not supported in this environment.');
@@ -327,184 +332,179 @@ export default function Home() {
     const navItems = [
         { id: 'epic-notes', label: 'Epic Notes', icon: Notebook },
         { id: 'pips', label: 'Pips', icon: DollarSign },
-        { id: 'crypto', label: 'Crypto', icon: Calculator },
+        { id: 'crypto', label: 'Crypto', icon: Bitcoin },
         { id: 'market', label: 'Market', icon: LineChart },
     ];
+    
+    const inputClassName = "form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#141414] focus:outline-0 focus:ring-0 border border-[#e0e0e0] bg-white focus:border-[#e0e0e0] h-14 placeholder:text-[#757575] p-[15px] text-base font-normal leading-normal";
+    const labelClassName = "block text-sm font-medium text-[#141414] mb-1";
+
 
     return (
-        <main className="flex flex-col h-screen bg-background">
-            <header className="p-4 border-b border-border bg-card shadow-sm">
-                <div className="flex items-center justify-between max-w-md mx-auto">
-                    <h1 className="text-2xl font-bold text-black">PX</h1>
+        <main className="relative flex size-full min-h-screen flex-col bg-white justify-between group/design-root overflow-x-hidden">
+            <div>
+                <header className="flex items-center bg-white p-4 pb-2 justify-between">
+                    <h1 className="text-[#141414] text-lg font-bold leading-tight tracking-[-0.015em] flex-1">PX</h1>
                     {fomcDateString && (
-                        <span className="text-sm text-muted-foreground whitespace-nowrap">{fomcDateString}</span>
+                        <div className="flex w-auto items-center justify-end">
+                           <p className="text-[#757575] text-sm font-bold leading-normal tracking-[0.015em] shrink-0 whitespace-nowrap">{fomcDateString}</p>
+                        </div>
                     )}
-                </div>
-            </header>
+                </header>
 
-            <div className="flex-grow overflow-y-auto p-4 pb-[76px]"> {/* Padding bottom for nav bar */}
-                <div className="w-full max-w-md mx-auto">
-                    {activeTab === 'epic-notes' && (
-                        <Card className="shadow-subtle rounded-lg">
-                            <CardContent className="p-4 space-y-4">
-                                
-                                <div className="divide-y divide-border">
+                <div className="flex-grow overflow-y-auto p-4 pb-[76px]">
+                    <div className="w-full max-w-md mx-auto">
+                        {activeTab === 'epic-notes' && (
+                            <div className="space-y-4">
+                                 <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-0 py-3">
+                                    <label className="flex flex-col min-w-40 flex-1">
+                                        <Input
+                                            ref={inputRef}
+                                            type="text"
+                                            placeholder="Add a new task..."
+                                            value={newTaskDescription}
+                                            onChange={(e) => setNewTaskDescription(e.target.value)}
+                                            onKeyDown={handleKeyDown}
+                                            className={inputClassName}
+                                        />
+                                    </label>
+                                </div>
+                                <div className="divide-y divide-[#e0e0e0]">
                                     {tasks.map((task) => (
-                                        <div key={task.id} className="flex items-center justify-between py-3 hover:bg-muted/20 transition-colors">
+                                        <div key={task.id} className="flex items-center justify-between py-3">
                                             <div className="flex items-center">
-                                                <Button variant="ghost" size="icon" className="mr-2 rounded-full h-8 w-8 hover:bg-accent/10" onClick={() => handleCompleteTask(task.id)}>
-                                                    {task.completed ? <Check className="h-5 w-5 text-accent"/> : <Circle className="h-5 w-5 text-muted-foreground"/>}
+                                                <Button variant="ghost" size="icon" className="mr-2 rounded-full h-8 w-8 hover:bg-gray-100" onClick={() => handleCompleteTask(task.id)}>
+                                                    {task.completed ? <Check className="h-5 w-5 text-green-500"/> : <Circle className="h-5 w-5 text-[#757575]"/>}
                                                 </Button>
-                                                <span className={cn('text-base text-foreground', task.completed && 'line-through text-muted-foreground')}>
+                                                <span className={cn('text-base', task.completed ? 'line-through text-[#757575]' : 'text-[#141414]')}>
                                                     {task.description}
                                                 </span>
                                             </div>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent/10 rounded-full" onClick={() => handleDeleteTask(task.id)}>
-                                                <Trash className="h-4 w-4 text-accent"/>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100 rounded-full" onClick={() => handleDeleteTask(task.id)}>
+                                                <Trash className="h-4 w-4 text-red-500"/>
                                             </Button>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex items-center mt-1 space-x-2">
-                                    <Input
-                                        ref={inputRef}
-                                        type="text"
-                                        placeholder="Add a new task..."
-                                        value={newTaskDescription}
-                                        onChange={(e) => setNewTaskDescription(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                        className="flex-grow bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle"
-                                    />
-                                    <Button
-                                        onClick={handleAddTask}
-                                        className="bg-[#FF6B6B] hover:bg-[#FF6B6B]/90 text-white rounded-lg"
-                                        size="icon"
-                                        aria-label="Add task"
-                                    >
-                                        <Plus className="h-5 w-5" />
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {activeTab === 'pips' && (
-                        <Card className="shadow-subtle rounded-lg">
-                            <CardContent className="p-4 space-y-4">
-                                <div className="grid gap-4">
-                                    <div>
-                                        <label htmlFor="stopLoss" className="block text-sm font-medium text-muted-foreground mb-1">Stop Loss</label>
-                                        <Input type="number" id="stopLoss" className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="entry" className="block text-sm font-medium text-muted-foreground mb-1">Entry</label>
-                                        <Input type="number" id="entry" className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle" value={entry} onChange={(e) => setEntry(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="takeProfit" className="block text-sm font-medium text-muted-foreground mb-1">Take Profit</label>
-                                        <Input type="number" id="takeProfit" className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="decimalPlaces" className="block text-sm font-medium text-muted-foreground mb-1">Decimal Places</label>
-                                        <select id="decimalPlaces" className="mt-1 block w-full rounded-lg border-border bg-input text-foreground shadow-subtle focus:border-ring focus:ring-ring sm:text-sm p-2.5" value={decimalPlaces} onChange={(e) => setDecimalPlaces(parseInt(e.target.value))}>
-                                            {[1,2,3,4,5].map(dp => <option key={dp} value={dp}>{dp}</option>)}
-                                        </select>
-                                    </div>
-                                    {pipsOfRisk !== null && pipsOfReward !== null && riskRewardRatio !== null && (
-                                        <div className="space-y-1 mt-3 p-3 bg-secondary/50 rounded-lg shadow-sm">
-                                            <p className="text-lg font-semibold text-[#8E44AD]">Result:</p>
-                                            <p className="text-foreground">Pips of Risk: <span className="font-medium text-primary">{pipsOfRisk.toFixed(2)}</span></p>
-                                            <p className="text-foreground">Pips of Reward: <span className="font-medium text-primary">{pipsOfReward.toFixed(2)}</span></p>
-                                            <p className="text-foreground">Risk/Reward Ratio: <span className="font-medium text-primary">{riskRewardRatio.toFixed(2)}</span></p>
-                                        </div>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {activeTab === 'crypto' && (
-                        <Card className="shadow-subtle rounded-lg">
-                            <CardContent className="p-4 space-y-4">
-                                <div className="grid gap-4">
-                                    <div>
-                                        <label htmlFor="accountBalance" className="block text-sm font-medium text-muted-foreground mb-1">Account Balance</label>
-                                        <Input type="number" id="accountBalance" className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle" value={accountBalance} onChange={(e) => setAccountBalance(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="cryptoEntry" className="block text-sm font-medium text-muted-foreground mb-1">Entry Price</label>
-                                        <Input type="number" id="cryptoEntry" className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle" value={cryptoEntry} onChange={(e) => setCryptoEntry(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="cryptoSL" className="block text-sm font-medium text-muted-foreground mb-1">Stop Loss</label>
-                                        <Input type="number" id="cryptoSL" className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle" value={cryptoSL} onChange={(e) => setCryptoSL(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="cryptoTP" className="block text-sm font-medium text-muted-foreground mb-1">Take Profit</label>
-                                        <Input type="number" id="cryptoTP" className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle" value={cryptoTP} onChange={(e) => setCryptoTP(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="riskPercentage" className="block text-sm font-medium text-muted-foreground mb-1">Risk Percentage</label>
-                                        <Input type="number" id="riskPercentage" className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle" value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} />
-                                    </div>
-                                    {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
-                                        <div className="space-y-1 mt-3 p-3 bg-secondary/50 rounded-lg shadow-sm">
-                                            <p className="text-lg font-semibold text-[#8E44AD]">Result:</p>
-                                            {positionSize !== null && <p className="text-foreground">Position Size: <span className="font-medium text-primary">{positionSize.toFixed(4)}</span></p>}
-                                            {cryptoRiskRewardRatio !== null && <p className="text-foreground">Risk/Reward Ratio: <span className="font-medium text-primary">{cryptoRiskRewardRatio.toFixed(2)}</span></p>}
-                                        </div>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                    {activeTab === 'market' && (
-                        <div className="space-y-4">
-                            {loading && <p className="text-center text-muted-foreground">Loading market data...</p>}
-                            {error && <p className="text-center text-destructive">{error}</p>}
-                            <div className="grid grid-cols-1 gap-y-2">
-                                {Object.keys(coinPrices).map((coinSymbol) => (
-                                    <div key={coinSymbol} className="space-y-2 pb-2">
-                                        <p className="text-lg text-foreground px-3 pt-2">
-                                            {coinSymbol}: <span className="text-primary">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span>
-                                        </p>
-                                        <div className="mx-3 space-y-2">
-                                            <Input
-                                                type="text"
-                                                className="bg-input text-foreground placeholder:text-muted-foreground rounded-lg border-border focus:ring-ring focus:border-ring shadow-subtle"
-                                                value={waitingPrices[coinSymbol] || ''}
-                                                onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
-                                            />
-                                            {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && (
-                                                <p className="text-sm text-foreground">Status: <span className={cn(
-                                                    getStatus(coinSymbol) === 'Within' ? 'text-accent' : 
-                                                    getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-destructive' : 'text-muted-foreground'
-                                                )}>{getStatus(coinSymbol)}</span></p>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
                             </div>
-                        </div>
-                    )}
+                        )}
+                        {activeTab === 'pips' && (
+                            <div className="space-y-4 pt-3">
+                                <div>
+                                    <label htmlFor="stopLoss" className={labelClassName}>Stop Loss</label>
+                                    <Input type="number" id="stopLoss" className={inputClassName} value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label htmlFor="entry" className={labelClassName}>Entry</label>
+                                    <Input type="number" id="entry" className={inputClassName} value={entry} onChange={(e) => setEntry(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label htmlFor="takeProfit" className={labelClassName}>Take Profit</label>
+                                    <Input type="number" id="takeProfit" className={inputClassName} value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label htmlFor="decimalPlaces" className={labelClassName}>Decimal Places</label>
+                                    <select id="decimalPlaces" className={cn(inputClassName, "p-[15px] h-14")} value={decimalPlaces} onChange={(e) => setDecimalPlaces(parseInt(e.target.value))}>
+                                        {[1,2,3,4,5].map(dp => <option key={dp} value={dp}>{dp}</option>)}
+                                    </select>
+                                </div>
+                                {pipsOfRisk !== null && pipsOfReward !== null && riskRewardRatio !== null && (
+                                    <div className="space-y-1 mt-3 p-3 bg-gray-50 rounded-xl border border-[#e0e0e0]">
+                                        <p className="text-lg font-semibold text-[#141414]">Result:</p>
+                                        <p className="text-[#141414]">Pips of Risk: <span className="font-medium">{pipsOfRisk.toFixed(2)}</span></p>
+                                        <p className="text-[#141414]">Pips of Reward: <span className="font-medium">{pipsOfReward.toFixed(2)}</span></p>
+                                        <p className="text-[#141414]">Risk/Reward Ratio: <span className="font-medium">{riskRewardRatio.toFixed(2)}</span></p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {activeTab === 'crypto' && (
+                             <div className="space-y-4 pt-3">
+                                <div>
+                                    <label htmlFor="accountBalance" className={labelClassName}>Account Balance</label>
+                                    <Input type="number" id="accountBalance" className={inputClassName} value={accountBalance} onChange={(e) => setAccountBalance(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label htmlFor="cryptoEntry" className={labelClassName}>Entry Price</label>
+                                    <Input type="number" id="cryptoEntry" className={inputClassName} value={cryptoEntry} onChange={(e) => setCryptoEntry(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label htmlFor="cryptoSL" className={labelClassName}>Stop Loss</label>
+                                    <Input type="number" id="cryptoSL" className={inputClassName} value={cryptoSL} onChange={(e) => setCryptoSL(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label htmlFor="cryptoTP" className={labelClassName}>Take Profit</label>
+                                    <Input type="number" id="cryptoTP" className={inputClassName} value={cryptoTP} onChange={(e) => setCryptoTP(e.target.value)} />
+                                </div>
+                                <div>
+                                    <label htmlFor="riskPercentage" className={labelClassName}>Risk Percentage</label>
+                                    <Input type="number" id="riskPercentage" className={inputClassName} value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} />
+                                </div>
+                                {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
+                                    <div className="space-y-1 mt-3 p-3 bg-gray-50 rounded-xl border border-[#e0e0e0]">
+                                        <p className="text-lg font-semibold text-[#141414]">Result:</p>
+                                        {positionSize !== null && <p className="text-[#141414]">Position Size: <span className="font-medium">{positionSize.toFixed(4)}</span></p>}
+                                        {cryptoRiskRewardRatio !== null && <p className="text-[#141414]">Risk/Reward Ratio: <span className="font-medium">{cryptoRiskRewardRatio.toFixed(2)}</span></p>}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {activeTab === 'market' && (
+                            <div className="space-y-2 pt-3">
+                                {loading && <p className="text-center text-[#757575]">Loading market data...</p>}
+                                {error && <p className="text-center text-red-500">{error}</p>}
+                                <div className="grid grid-cols-1 gap-y-2">
+                                    {Object.keys(coinPrices).map((coinSymbol) => (
+                                        <div key={coinSymbol} className="space-y-2 pb-2">
+                                            <p className="text-base text-[#141414] px-0 pt-2">
+                                                {coinSymbol}: <span className="font-medium">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span>
+                                            </p>
+                                            <div className="space-y-2">
+                                                <Input
+                                                    type="text"
+                                                    className={inputClassName}
+                                                    value={waitingPrices[coinSymbol] || ''}
+                                                    onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
+                                                />
+                                                {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && (
+                                                    <p className="text-sm text-[#141414]">Status: <span className={cn(
+                                                        getStatus(coinSymbol) === 'Within' ? 'text-green-500' : 
+                                                        getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-red-500' : 'text-[#757575]'
+                                                    )}>{getStatus(coinSymbol)}</span></p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-
-            <nav className="fixed bottom-0 left-0 right-0 flex justify-around bg-card border-t border-border shadow-md">
-                {navItems.map(item => (
-                    <button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id as ActiveView)}
-                        className={cn(
-                            "flex flex-col items-center justify-center flex-1 p-2 text-xs hover:bg-muted/30 transition-colors",
-                            activeTab === item.id ? "text-primary font-medium border-t-2 border-primary" : "text-muted-foreground"
-                        )}
-                        style={{ minHeight: '60px' }} 
-                    >
-                        <item.icon className={cn("h-5 w-5 mb-0.5", activeTab === item.id ? "text-primary" : "text-muted-foreground")} />
-                        {item.label}
-                    </button>
-                ))}
-            </nav>
+            
+            <div>
+              <div className="flex gap-2 border-t border-[#f2f2f2] bg-white px-4 pb-3 pt-2">
+                  {navItems.map(item => (
+                      <button // Changed from <a> to <button> for semantic correctness
+                          key={item.id}
+                          onClick={() => setActiveTab(item.id as ActiveView)}
+                          className={cn(
+                              "flex flex-1 flex-col items-center justify-end gap-1 rounded-full py-1", // Added py-1 for a bit of vertical padding in the button
+                              activeTab === item.id ? "text-[#141414]" : "text-[#757575]"
+                          )}
+                          aria-current={activeTab === item.id ? "page" : undefined}
+                      >
+                          <div className={cn("flex h-8 w-8 items-center justify-center", // Ensured icon container fixed size
+                            activeTab === item.id ? "text-[#141414]" : "text-[#757575]")}>
+                              <item.icon className="h-6 w-6" /> {/* Standardized icon size */}
+                          </div>
+                          {/* Removed text label as per visual example if icons are sufficient, or add small text below if needed */}
+                          {/* <span className="text-xs">{item.label}</span> */}
+                      </button>
+                  ))}
+              </div>
+              <div className="h-5 bg-white"></div> {/* Safe area padding for bottom */}
+            </div>
         </main>
     );
 }
-

@@ -62,9 +62,10 @@ export default {
   			}
   		},
   		borderRadius: {
-  			lg: 'var(--radius)', // This will now be 0.75rem (12px) due to globals.css change
-  			md: 'calc(var(--radius) - 0.25rem)', // Adjusted for a 12px base: 12px - 4px = 8px
-  			sm: 'calc(var(--radius) - 0.5rem)'  // Adjusted for a 12px base: 12px - 8px = 4px
+  			lg: 'var(--radius)', 
+  			md: 'calc(var(--radius) - 0.25rem)', 
+  			sm: 'calc(var(--radius) - 0.5rem)',
+        xl: '0.75rem', // Added from new design spec (12px)
   		},
   		keyframes: {
   			'accordion-down': {
@@ -88,8 +89,10 @@ export default {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
   		},
-      boxShadow: { // Added subtle shadow as per request
-        'subtle': '0 2px 6px rgba(0, 0, 0, 0.1)',
+      boxShadow: { 
+        // New design doesn't emphasize shadows on inputs, uses borders.
+        // Keep subtle if needed for other elements, or remove if unused.
+        // 'subtle': '0 2px 6px rgba(0, 0, 0, 0.1)', 
       }
   	}
   },

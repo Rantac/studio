@@ -1,22 +1,18 @@
 'use client';
 
-import {Geist, Geist_Mono} from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import {useEffect} from 'react';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: '--font-plus-jakarta-sans',
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // This code will only run on the client side
-    document.body.className = `${geistSans.variable} ${geistMono.variable} antialiased`;
+    document.body.className = `${plusJakartaSans.variable} antialiased`;
   }, []);
 
   return (

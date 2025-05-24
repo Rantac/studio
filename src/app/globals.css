@@ -3,113 +3,118 @@
 @tailwind utilities;
 
 body {
-  font-family: Inter, Roboto, sans-serif; /* Updated font */
+  font-family: var(--font-plus-jakarta-sans), "Noto Sans", Inter, Roboto, sans-serif; /* Updated font */
 }
 
 @layer base {
   :root {
-    --background: hsl(210, 25%, 96.7%); /* #F5F7FA Very light gray */
-    --foreground: hsl(0, 0%, 50%); /* #808080 Medium-Light Gray */
+    /* New Design Palette - White Theme */
+    --background: hsl(0, 0%, 100%); /* #FFFFFF White */
+    --foreground: hsl(0, 0%, 7%); /* #141414 Very Dark Gray (Almost Black) */
 
     --card: hsl(0, 0%, 100%); /* #FFFFFF White */
-    --card-foreground: hsl(0, 0%, 50%); /* #808080 Medium-Light Gray */
+    --card-foreground: hsl(0, 0%, 7%); /* #141414 */
 
     --popover: hsl(0, 0%, 100%); /* #FFFFFF White */
-    --popover-foreground: hsl(0, 0%, 50%); /* #808080 Medium-Light Gray */
+    --popover-foreground: hsl(0, 0%, 7%); /* #141414 */
 
-    --primary: hsl(217, 71%, 59%); /* #4A90E2 Soft Blue */
-    --primary-foreground: hsl(0, 0%, 100%); /* White for contrast on Soft Blue */
+    /* Primary will be mostly direct classes, but set a fallback */
+    --primary: hsl(0, 0%, 7%); /* #141414 */
+    --primary-foreground: hsl(0, 0%, 100%); /* White for contrast */
 
-    --secondary: hsl(210, 25%, 92%); /* #EBEFF3 Light Gray for secondary elements */
-    --secondary-foreground: hsl(0, 0%, 50%); /* #808080 Medium-Light Gray */
+    /* Secondary also mostly direct classes */
+    --secondary: hsl(0, 0%, 95%); /* #F2F2F2 Light Gray for secondary elements like nav border */
+    --secondary-foreground: hsl(0, 0%, 7%); /* #141414 */
 
-    --muted: hsl(210, 25%, 92%); /* #EBEFF3 Light Gray */
-    --muted-foreground: hsl(0, 0%, 65%); /* #A6A6A6 Light Gray */
+    --muted: hsl(0, 0%, 97%); /* #F7F7F7 - for subtle backgrounds if needed */
+    --muted-foreground: hsl(0, 0%, 46%); /* #757575 Medium Gray */
 
-    --accent: hsl(169, 72%, 60%); /* #50E3C2 Mint Green */
-    --accent-foreground: hsl(0, 0%, 0%); /* Black for contrast */
+    /* Accent not strongly defined in new design, using a neutral */
+    --accent: hsl(0, 0%, 90%); /* Light gray for general accents if needed */
+    --accent-foreground: hsl(0, 0%, 7%); /* #141414 */
 
     --destructive: hsl(0, 84.2%, 60.2%); /* Standard destructive red */
     --destructive-foreground: hsl(0, 0%, 98%); /* White for text on destructive */
 
-    --border: hsl(0, 0%, 85%); /* #D9D9D9 Very Light Gray for borders */
+    --border: hsl(0, 0%, 88%); /* #e0e0e0 General borders, input borders */
     --input: hsl(0, 0%, 100%); /* #FFFFFF White for inputs */
-    --ring: hsl(217, 71%, 59%); /* #4A90E2 Soft Blue for focus rings */
+    --ring: hsl(0, 0%, 7%); /* #141414 for focus rings if not disabled */
 
-    --radius: 0.75rem; /* 12px for rounded corners */
+    --radius: 0.75rem; /* 12px for rounded corners (used by rounded-lg) */
     
-    /* Chart colors based on new theme */
+    /* Chart colors - retain or update based on new theme's needs */
     --chart-1: hsl(var(--primary));
-    --chart-2: hsl(var(--accent));
+    --chart-2: hsl(210, 40%, 50%); /* A generic blue if needed */
     --chart-3: hsl(var(--muted-foreground)); 
-    --chart-4: hsl(217, 71%, 70%);  /* Lighter Primary */
-    --chart-5: hsl(169, 72%, 70%); /* Lighter Accent */
+    --chart-4: hsl(0, 0%, 30%); 
+    --chart-5: hsl(0, 0%, 50%);
 
-    /* Sidebar colors (if used) - Updated to match theme */
-    --sidebar-background: hsl(0, 0%, 100%); /* White */
-    --sidebar-foreground: hsl(0, 0%, 50%); /* Medium-Light Gray */
-    --sidebar-primary: hsl(217, 71%, 59%); /* Soft Blue */
-    --sidebar-primary-foreground: hsl(0, 0%, 100%); /* White */
-    --sidebar-accent: hsl(169, 72%, 60%); /* Mint Green */
-    --sidebar-accent-foreground: hsl(0, 0%, 0%); /* Black */
-    --sidebar-border: hsl(0, 0%, 85%); /* Very Light Gray */
-    --sidebar-ring: hsl(217, 71%, 59%); /* Soft Blue */
+    /* Sidebar colors - not directly applicable to current design but kept for completeness */
+    --sidebar-background: hsl(0, 0%, 100%); 
+    --sidebar-foreground: hsl(0, 0%, 7%); 
+    --sidebar-primary: hsl(0, 0%, 7%); 
+    --sidebar-primary-foreground: hsl(0, 0%, 100%); 
+    --sidebar-accent: hsl(0, 0%, 90%); 
+    --sidebar-accent-foreground: hsl(0, 0%, 7%); 
+    --sidebar-border: hsl(0, 0%, 88%); 
+    --sidebar-ring: hsl(0, 0%, 7%); 
   }
 
   .dark {
-    --background: hsl(220, 13%, 18%); /* Darker background */
-    --foreground: hsl(0, 0%, 90%); /* #E6E6E6 Very Light Gray */
+    /* Dark Theme Adjustments for new design if needed, for now keep it similar to light conceptually */
+    --background: hsl(0, 0%, 7%); /* #141414 */
+    --foreground: hsl(0, 0%, 93%); /* #EDEDED Light Gray for text */
 
-    --card: hsl(220, 13%, 14%); /* Darker shade for cards */
-    --card-foreground: hsl(0, 0%, 90%); /* #E6E6E6 Very Light Gray */
+    --card: hsl(0, 0%, 10%); /* Darker shade for cards/inputs */
+    --card-foreground: hsl(0, 0%, 93%); 
 
-    --popover: hsl(220, 13%, 14%);
-    --popover-foreground: hsl(0, 0%, 90%); /* #E6E6E6 Very Light Gray */
+    --popover: hsl(0, 0%, 10%);
+    --popover-foreground: hsl(0, 0%, 93%);
 
-    --primary: hsl(217, 71%, 65%); /* Dark mode friendly Soft Blue */
-    --primary-foreground: hsl(0, 0%, 100%); 
+    --primary: hsl(0, 0%, 93%); 
+    --primary-foreground: hsl(0, 0%, 7%); 
 
-    --secondary: hsl(220, 13%, 25%); /* Dark Gray for secondary elements */
-    --secondary-foreground: hsl(0, 0%, 90%); /* #E6E6E6 Very Light Gray */
+    --secondary: hsl(0, 0%, 15%); 
+    --secondary-foreground: hsl(0, 0%, 93%); 
 
-    --muted: hsl(220, 13%, 25%);
-    --muted-foreground: hsl(0, 0%, 65%); /* #A6A6A6 Light Gray */
+    --muted: hsl(0, 0%, 15%);
+    --muted-foreground: hsl(0, 0%, 60%); /* #999999 Lighter gray for dark muted */
 
-    --accent: hsl(169, 72%, 65%); /* Dark mode friendly Mint Green */
-    --accent-foreground: hsl(0, 0%, 0%); /* Black for contrast on light accent */
+    --accent: hsl(0, 0%, 20%);
+    --accent-foreground: hsl(0, 0%, 93%);
 
     --destructive: hsl(0, 70%, 50.2%); 
     --destructive-foreground: hsl(0, 0%, 98%);
 
     --border: hsl(0, 0%, 30%); /* #4D4D4D Dark Gray for borders */
-    --input: hsl(220, 13%, 16%); /* Dark input background */
-    --ring: hsl(217, 71%, 65%); /* Dark mode friendly Soft Blue for focus rings */
+    --input: hsl(0, 0%, 10%); /* Dark input background */
+    --ring: hsl(0, 0%, 93%);
     
     /* Chart colors for dark theme */
     --chart-1: hsl(var(--primary));
-    --chart-2: hsl(var(--accent));
+    --chart-2: hsl(210, 40%, 60%);
     --chart-3: hsl(var(--muted-foreground));
-    --chart-4: hsl(217, 71%, 75%);
-    --chart-5: hsl(169, 72%, 75%);
+    --chart-4: hsl(0, 0%, 70%);
+    --chart-5: hsl(0, 0%, 50%);
 
     /* Sidebar colors for dark theme */
-    --sidebar-background: hsl(220, 13%, 12%);
-    --sidebar-foreground: hsl(0, 0%, 90%); /* Very Light Gray */
-    --sidebar-primary: hsl(217, 71%, 65%);
-    --sidebar-primary-foreground: hsl(0, 0%, 100%);
-    --sidebar-accent: hsl(169, 72%, 65%);
-    --sidebar-accent-foreground: hsl(0, 0%, 0%); /* Black */
-    --sidebar-border: hsl(0, 0%, 30%); /* Dark Gray */
-    --sidebar-ring: hsl(217, 71%, 65%);
+    --sidebar-background: hsl(0, 0%, 5%);
+    --sidebar-foreground: hsl(0, 0%, 93%);
+    --sidebar-primary: hsl(0, 0%, 93%);
+    --sidebar-primary-foreground: hsl(0, 0%, 7%);
+    --sidebar-accent: hsl(0, 0%, 20%);
+    --sidebar-accent-foreground: hsl(0, 0%, 93%);
+    --sidebar-border: hsl(0, 0%, 30%);
+    --sidebar-ring: hsl(0, 0%, 93%);
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border; /* Default border color */
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1; /* More typographic refinements */
+    font-feature-settings: "rlig" 1, "calt" 1; 
   }
 }
