@@ -136,6 +136,7 @@ export default function Home() {
       
       for (const meeting of sortedMeetings) {
         const meetingStartDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.startDay);
+        // Consider the meeting relevant if today is before or on the end day
         const meetingEndDate = new Date(currentYear, getMonthIndex(meeting.month), meeting.endDay, 23, 59, 59, 999);
         
         if (today <= meetingEndDate) {
@@ -144,6 +145,7 @@ export default function Home() {
         }
       }
 
+      // If all meetings for the current year have passed, show the first meeting of next year
       if (!upcomingMeetingData && sortedMeetings.length > 0) {
         upcomingMeetingData = { ...sortedMeetings[0], year: currentYear + 1 };
       }
@@ -151,7 +153,7 @@ export default function Home() {
       if (upcomingMeetingData) {
         setFomcDateString(`FOMC: ${upcomingMeetingData.month} ${upcomingMeetingData.startDay}-${upcomingMeetingData.endDay}`);
       } else {
-        setFomcDateString('FOMC: TBD');
+        setFomcDateString('FOMC: TBD'); // Should not happen if fomcMeetingDates is populated
       }
     }, []);
 
@@ -336,15 +338,15 @@ export default function Home() {
         { id: 'market', label: 'Market', icon: LineChart },
     ];
     
-    const inputClassName = "form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#141414] focus:outline-0 focus:ring-0 border border-[#e0e0e0] bg-white focus:border-[#e0e0e0] h-14 placeholder:text-[#757575] p-[15px] text-base font-normal leading-normal";
-    const labelClassName = "block text-sm font-medium text-[#141414] mb-1";
+    const inputClassName = "form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#141414] focus:outline-0 focus:ring-0 border border-[#e0e0e0] bg-white focus:border-[#e0e0e0] h-10 placeholder:text-[#757575] px-3 py-2 text-sm font-normal leading-normal";
+    const labelClassName = "block text-xs font-medium text-[#141414] mb-1";
 
 
     return (
         <main className="relative flex size-full min-h-screen flex-col bg-white justify-between group/design-root overflow-x-hidden">
             <div>
-                <header className="flex items-center bg-white p-4 pb-2 justify-between">
-                    <h1 className="text-[#141414] text-lg font-bold leading-tight tracking-[-0.015em] flex-1">PX</h1>
+                <header className="flex items-center bg-white p-3 pb-1 justify-between">
+                    <h1 className="text-[#141414] text-base font-bold leading-tight tracking-[-0.015em] flex-1">PX</h1>
                     {fomcDateString && (
                         <div className="flex w-auto items-center justify-end">
                            <p className="text-[#757575] text-sm font-bold leading-normal tracking-[0.015em] shrink-0 whitespace-nowrap">{fomcDateString}</p>
@@ -352,11 +354,11 @@ export default function Home() {
                     )}
                 </header>
 
-                <div className="flex-grow overflow-y-auto p-4 pb-[76px]">
+                <div className="flex-grow overflow-y-auto p-3 pb-[68px]"> {/* Reduced bottom padding */}
                     <div className="w-full max-w-md mx-auto">
                         {activeTab === 'epic-notes' && (
-                            <div className="space-y-4">
-                                 <div className="flex max-w-[480px] flex-wrap items-end gap-4 px-0 py-3">
+                            <div className="space-y-3">
+                                 <div className="flex max-w-[480px] flex-wrap items-end gap-3 px-3 py-2">
                                     <label className="flex flex-col min-w-40 flex-1">
                                         <Input
                                             ref={inputRef}
@@ -371,16 +373,16 @@ export default function Home() {
                                 </div>
                                 <div className="divide-y divide-[#e0e0e0]">
                                     {tasks.map((task) => (
-                                        <div key={task.id} className="flex items-center justify-between py-3">
+                                        <div key={task.id} className="flex items-center justify-between py-2">
                                             <div className="flex items-center">
-                                                <Button variant="ghost" size="icon" className="mr-2 rounded-full h-8 w-8 hover:bg-gray-100" onClick={() => handleCompleteTask(task.id)}>
-                                                    {task.completed ? <Check className="h-5 w-5 text-green-500"/> : <Circle className="h-5 w-5 text-[#757575]"/>}
+                                                <Button variant="ghost" size="icon" className="mr-2 rounded-full h-6 w-6 hover:bg-gray-100" onClick={() => handleCompleteTask(task.id)}>
+                                                    {task.completed ? <Check className="h-4 w-4 text-green-500"/> : <Circle className="h-4 w-4 text-[#757575]"/>}
                                                 </Button>
-                                                <span className={cn('text-base', task.completed ? 'line-through text-[#757575]' : 'text-[#141414]')}>
+                                                <span className={cn('text-sm', task.completed ? 'line-through text-[#757575]' : 'text-[#141414]')}>
                                                     {task.description}
                                                 </span>
                                             </div>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-gray-100 rounded-full" onClick={() => handleDeleteTask(task.id)}>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-gray-100 rounded-full" onClick={() => handleDeleteTask(task.id)}>
                                                 <Trash className="h-4 w-4 text-red-500"/>
                                             </Button>
                                         </div>
@@ -389,7 +391,7 @@ export default function Home() {
                             </div>
                         )}
                         {activeTab === 'pips' && (
-                            <div className="space-y-4 pt-3">
+                            <div className="space-y-3 pt-2">
                                 <div>
                                     <label htmlFor="stopLoss" className={labelClassName}>Stop Loss</label>
                                     <Input type="number" id="stopLoss" className={inputClassName} value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} />
@@ -404,22 +406,22 @@ export default function Home() {
                                 </div>
                                 <div>
                                     <label htmlFor="decimalPlaces" className={labelClassName}>Decimal Places</label>
-                                    <select id="decimalPlaces" className={cn(inputClassName, "p-[15px] h-14")} value={decimalPlaces} onChange={(e) => setDecimalPlaces(parseInt(e.target.value))}>
+                                    <select id="decimalPlaces" className={cn(inputClassName, "px-3 py-2 h-10")} value={decimalPlaces} onChange={(e) => setDecimalPlaces(parseInt(e.target.value))}>
                                         {[1,2,3,4,5].map(dp => <option key={dp} value={dp}>{dp}</option>)}
                                     </select>
                                 </div>
                                 {pipsOfRisk !== null && pipsOfReward !== null && riskRewardRatio !== null && (
-                                    <div className="space-y-1 mt-3 p-3 bg-gray-50 rounded-xl border border-[#e0e0e0]">
-                                        <p className="text-lg font-semibold text-[#141414]">Result:</p>
-                                        <p className="text-[#141414]">Pips of Risk: <span className="font-medium">{pipsOfRisk.toFixed(2)}</span></p>
-                                        <p className="text-[#141414]">Pips of Reward: <span className="font-medium">{pipsOfReward.toFixed(2)}</span></p>
-                                        <p className="text-[#141414]">Risk/Reward Ratio: <span className="font-medium">{riskRewardRatio.toFixed(2)}</span></p>
+                                    <div className="space-y-1 mt-2 p-2 bg-gray-50 rounded-xl border border-[#e0e0e0]">
+                                        <p className="text-base font-semibold text-[#141414]">Result:</p>
+                                        <p className="text-sm text-[#141414]">Pips of Risk: <span className="font-medium">{pipsOfRisk.toFixed(2)}</span></p>
+                                        <p className="text-sm text-[#141414]">Pips of Reward: <span className="font-medium">{pipsOfReward.toFixed(2)}</span></p>
+                                        <p className="text-sm text-[#141414]">Risk/Reward Ratio: <span className="font-medium">{riskRewardRatio.toFixed(2)}</span></p>
                                     </div>
                                 )}
                             </div>
                         )}
                         {activeTab === 'crypto' && (
-                             <div className="space-y-4 pt-3">
+                             <div className="space-y-3 pt-2">
                                 <div>
                                     <label htmlFor="accountBalance" className={labelClassName}>Account Balance</label>
                                     <Input type="number" id="accountBalance" className={inputClassName} value={accountBalance} onChange={(e) => setAccountBalance(e.target.value)} />
@@ -441,25 +443,25 @@ export default function Home() {
                                     <Input type="number" id="riskPercentage" className={inputClassName} value={riskPercentage} onChange={(e) => setRiskPercentage(e.target.value)} />
                                 </div>
                                 {(positionSize !== null || cryptoRiskRewardRatio !== null) && (
-                                    <div className="space-y-1 mt-3 p-3 bg-gray-50 rounded-xl border border-[#e0e0e0]">
-                                        <p className="text-lg font-semibold text-[#141414]">Result:</p>
-                                        {positionSize !== null && <p className="text-[#141414]">Position Size: <span className="font-medium">{positionSize.toFixed(4)}</span></p>}
-                                        {cryptoRiskRewardRatio !== null && <p className="text-[#141414]">Risk/Reward Ratio: <span className="font-medium">{cryptoRiskRewardRatio.toFixed(2)}</span></p>}
+                                    <div className="space-y-1 mt-2 p-2 bg-gray-50 rounded-xl border border-[#e0e0e0]">
+                                        <p className="text-base font-semibold text-[#141414]">Result:</p>
+                                        {positionSize !== null && <p className="text-sm text-[#141414]">Position Size: <span className="font-medium">{positionSize.toFixed(4)}</span></p>}
+                                        {cryptoRiskRewardRatio !== null && <p className="text-sm text-[#141414]">Risk/Reward Ratio: <span className="font-medium">{cryptoRiskRewardRatio.toFixed(2)}</span></p>}
                                     </div>
                                 )}
                             </div>
                         )}
                         {activeTab === 'market' && (
-                            <div className="space-y-2 pt-3">
-                                {loading && <p className="text-center text-[#757575]">Loading market data...</p>}
-                                {error && <p className="text-center text-red-500">{error}</p>}
-                                <div className="grid grid-cols-1 gap-y-2">
+                            <div className="space-y-1.5 pt-2">
+                                {loading && <p className="text-center text-xs text-[#757575]">Loading market data...</p>}
+                                {error && <p className="text-center text-xs text-red-500">{error}</p>}
+                                <div className="grid grid-cols-1 gap-y-1.5">
                                     {Object.keys(coinPrices).map((coinSymbol) => (
-                                        <div key={coinSymbol} className="space-y-2 pb-2">
-                                            <p className="text-base text-[#141414] px-0 pt-2">
+                                        <div key={coinSymbol} className="space-y-1 pb-1">
+                                            <p className="text-sm text-[#141414] px-0 pt-1">
                                                 {coinSymbol}: <span className="font-medium">{coinPrices[coinSymbol] !== null ? `$${coinPrices[coinSymbol]!.toFixed(2)}` : 'Loading...'}</span>
                                             </p>
-                                            <div className="space-y-2">
+                                            <div className="space-y-1">
                                                 <Input
                                                     type="text"
                                                     className={inputClassName}
@@ -467,7 +469,7 @@ export default function Home() {
                                                     onChange={(e) => setWaitingPrices(prev => ({...prev, [coinSymbol]: e.target.value}))}
                                                 />
                                                 {waitingPrices[coinSymbol] && coinPrices[coinSymbol] && (
-                                                    <p className="text-sm text-[#141414]">Status: <span className={cn(
+                                                    <p className="text-xs text-[#141414]">Status: <span className={cn(
                                                         getStatus(coinSymbol) === 'Within' ? 'text-green-500' : 
                                                         getStatus(coinSymbol) === 'Above' || getStatus(coinSymbol) === 'Below' ? 'text-red-500' : 'text-[#757575]'
                                                     )}>{getStatus(coinSymbol)}</span></p>
@@ -483,28 +485,29 @@ export default function Home() {
             </div>
             
             <div>
-              <div className="flex gap-2 border-t border-[#f2f2f2] bg-white px-4 pb-3 pt-2">
+              <div className="flex gap-2 border-t border-[#f2f2f2] bg-white px-3 pb-2 pt-1">
                   {navItems.map(item => (
-                      <button // Changed from <a> to <button> for semantic correctness
+                      <button 
                           key={item.id}
                           onClick={() => setActiveTab(item.id as ActiveView)}
                           className={cn(
-                              "flex flex-1 flex-col items-center justify-end gap-1 rounded-full py-1", // Added py-1 for a bit of vertical padding in the button
+                              "flex flex-1 flex-col items-center justify-end gap-0.5 rounded-full py-0.5", 
                               activeTab === item.id ? "text-[#141414]" : "text-[#757575]"
                           )}
                           aria-current={activeTab === item.id ? "page" : undefined}
                       >
-                          <div className={cn("flex h-8 w-8 items-center justify-center", // Ensured icon container fixed size
+                          <div className={cn("flex h-6 w-6 items-center justify-center", 
                             activeTab === item.id ? "text-[#141414]" : "text-[#757575]")}>
-                              <item.icon className="h-6 w-6" /> {/* Standardized icon size */}
+                              <item.icon className="h-5 w-5" /> 
                           </div>
-                          {/* Removed text label as per visual example if icons are sufficient, or add small text below if needed */}
-                          {/* <span className="text-xs">{item.label}</span> */}
+                           {/* <span className="text-xs">{item.label}</span> */}
                       </button>
                   ))}
               </div>
-              <div className="h-5 bg-white"></div> {/* Safe area padding for bottom */}
+              <div className="h-3 bg-white"></div> {/* Safe area padding for bottom */}
             </div>
         </main>
     );
 }
+
+    
