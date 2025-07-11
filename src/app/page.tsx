@@ -39,14 +39,11 @@ function getMonthIndex(monthName: string): number {
   return monthMap[monthName.slice(0,3)];
 }
 
-type ActiveView = 'epic-notes' | 'pips' | 'crypto' | 'market';
+type ActiveView = 'pips' | 'crypto' | 'market';
 
 export default function Home() {
-    const [activeTab, setActiveTab] = useState<ActiveView>('epic-notes');
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const [newTaskDescription, setNewTaskDescription] = useState('');
+    const [activeTab, setActiveTab] = useState<ActiveView>('pips');
     const {toast} = useToast();
-    const inputRef = useRef<HTMLInputElement>(null);
     const [fomcDateString, setFomcDateString] = useState('');
 
     const [stopLoss, setStopLoss] = useState('');
@@ -101,8 +98,6 @@ export default function Home() {
     };
     
     useEffect(() => {
-        const storedTasks = localStorage.getItem('tasks');
-        if (storedTasks) setTasks(JSON.parse(storedTasks));
         const storedWaitingPrices = localStorage.getItem('waitingPrices');
         if (storedWaitingPrices) setWaitingPrices(JSON.parse(storedWaitingPrices));
         
@@ -118,9 +113,8 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('tasks', JSON.stringify(tasks));
         localStorage.setItem('waitingPrices', JSON.stringify(waitingPrices));
-    }, [tasks, waitingPrices]);
+    }, [waitingPrices]);
     
     useEffect(() => {
       const today = new Date();
@@ -154,22 +148,6 @@ export default function Home() {
         setFomcDateString('FOMC: TBD');
       }
     }, []);
-
-    const handleAddTask = async () => {
-        if (newTaskDescription.trim() !== '') {
-            const newTask: Task = { id: Date.now().toString(), description: newTaskDescription, completed: false };
-            setTasks([...tasks, newTask]);
-            setNewTaskDescription('');
-            inputRef.current?.focus();
-            toast({ title: 'Task Added!', description: 'Your task has been successfully added.' });
-        } else {
-            toast({ title: 'Error', description: 'Task description cannot be empty.', variant: 'destructive' });
-        }
-    };
-
-    const handleCompleteTask = (id: string) => setTasks(tasks.map(task => task.id === id ? {...task, completed: !task.completed} : task));
-    const handleDeleteTask = (id: string) => setTasks(tasks.filter(task => task.id !== id));
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => event.key === 'Enter' && handleAddTask();
 
     const calculatePips = () => {
         if (!stopLoss || !entry || !takeProfit) { setPipsOfRisk(null); setPipsOfReward(null); setRiskRewardRatio(null); return; }
@@ -330,7 +308,6 @@ export default function Home() {
     };
     
     const navItems = [
-        { id: 'epic-notes', label: 'Epic Notes', icon: Notebook },
         { id: 'pips', label: 'Pips', icon: DollarSign },
         { id: 'crypto', label: 'Crypto', icon: Bitcoin },
         { id: 'market', label: 'Market', icon: LineChart },
@@ -354,40 +331,6 @@ export default function Home() {
 
                 <div className="flex-grow overflow-y-auto p-3 pb-[68px]">
                     <div className="w-full max-w-md mx-auto">
-                        {activeTab === 'epic-notes' && (
-                            <div className="space-y-3">
-                                 <div className="flex max-w-[480px] flex-wrap items-end gap-3 px-3 py-2">
-                                    <label className="flex flex-col min-w-40 flex-1">
-                                        <Input
-                                            ref={inputRef}
-                                            type="text"
-                                            placeholder="Add a new task..."
-                                            value={newTaskDescription}
-                                            onChange={(e) => setNewTaskDescription(e.target.value)}
-                                            onKeyDown={handleKeyDown}
-                                            className={inputClassName}
-                                        />
-                                    </label>
-                                </div>
-                                <div className="divide-y divide-[#e0e0e0]">
-                                    {tasks.map((task) => (
-                                        <div key={task.id} className="flex items-center justify-between py-2">
-                                            <div className="flex items-center">
-                                                <Button variant="ghost" size="icon" className="mr-2 rounded-full h-6 w-6 hover:bg-gray-100" onClick={() => handleCompleteTask(task.id)}>
-                                                    {task.completed ? <Check className="h-4 w-4 text-green-500"/> : <Circle className="h-4 w-4 text-[#757575]"/>}
-                                                </Button>
-                                                <span className={cn('text-sm', task.completed ? 'line-through text-[#757575]' : 'text-[#141414]')}>
-                                                    {task.description}
-                                                </span>
-                                            </div>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-gray-100 rounded-full" onClick={() => handleDeleteTask(task.id)}>
-                                                <Trash className="h-4 w-4 text-red-500"/>
-                                            </Button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                         {activeTab === 'pips' && (
                             <div className="space-y-3 pt-2">
                                 <div>
